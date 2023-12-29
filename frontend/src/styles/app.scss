@@ -32,11 +32,17 @@
   
   @import "admin-styles/mixin";
   
+  // front-end ecommerce
+  @import "frontend-styles/home";
+  
   @import "admin-styles/dashboard";
   @import "admin-styles/products";
   @import "admin-styles/chart";
   @import "admin-styles/dashboardapp";
   @import "admin-styles/mediaquery";
+
+
+
 
   .header{
     @include flex(row,space-between,center,1);

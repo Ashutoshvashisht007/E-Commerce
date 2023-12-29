@@ -6,21 +6,25 @@ const user = { _id: "asdf",role: "user"};
 
 const Header = () => {
 
-    const [open,isOpen] = useState<boolean>(false)
+    const [open,isOpen] = useState<boolean>(false);
+
+    const logOutHandler = ()=> {
+        isOpen(false);
+    }
 
   return (
     <nav className="header">
         <div className="navLeft">
             <Link to='/' style={{ textDecoration: "none", color: "inherit" }}>
-            <h2>Home</h2>
+            <h2 onClick={()=> isOpen(false)}>Home</h2>
             </Link>
         </div>
         <div className="navRight">
             <Link to={'/search'} style={{textDecoration: "none", color: "inherit"}}>
-                <button><FaSearch/></button>
+                <button onClick={()=> isOpen(false)}><FaSearch/></button>
             </Link>
             <Link to={'/cart'} style={{textDecoration: "none", color: "inherit"}}>
-                <button><FaShoppingCart /></button>
+                <button onClick={()=> isOpen(false)}><FaShoppingCart /></button>
             </Link>
 
             {
@@ -36,8 +40,8 @@ const Header = () => {
                                         <Link to="admin/dashboard">Admin</Link>
                                     )
                                 }
-                                <Link to="/orders">Orders</Link>
-                                <button>
+                                <Link onClick={()=> isOpen(false)} to="/orders">Orders</Link>
+                                <button onClick={logOutHandler}>
                                     <FaSignOutAlt/>
                                 </button>
                             </div>

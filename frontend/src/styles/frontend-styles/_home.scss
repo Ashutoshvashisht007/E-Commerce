@@ -1,0 +1,52 @@
+@import "../admin-styles/mixin";
+// @import {gadgets} from "../assets/gadgets.jpg"
+
+.home{
+    padding: 30px;
+    height: calc(100vh - 4rem);
+    width: 100%;
+}
+
+.homeSection{
+    width: 100%;
+    height: 15rem;
+    margin: auto;
+    background-image: url("../../assets/gadgets.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.homeHeading{
+    @include flex(row,space-between,center);
+    color: #555;
+
+    >h3{
+        cursor: pointer;
+        &:hover{
+            border-bottom: 1px solid rgb(46,46,46);
+        }
+    }
+}
+
+.homeProducts{
+    margin-top: 20px;
+    @include flex(row,space-between,center,1.5rem);
+    flex-wrap: wrap
+}
+
+.homeProduct{
+    margin-top: 10px;
+    // background-color: white;
+    @include flex(column,center,center,1rem);
+}
+
+.homeProductIMG{
+    width: 15rem;
+    height: 15rem;
+    // aspect-ratio: 3/2;
+    background-color: white;
+    object-fit: cover;
+    border-radius: 15px;
+    // mix-blend-mode:color;
+}
