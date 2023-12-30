@@ -1,5 +1,5 @@
 import iPhone14 from "../assets/images/iphone14.png"
-import gadgets from "../assets/gadgets.jpg"
+// import gadgets from "../assets/gadgets.jpg"
 
 const Home = () => {
   return (
