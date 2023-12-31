@@ -56,6 +56,7 @@ const Home = () => {
   return (
     <div className="home">
       <section className="homeSection">
+        <h1 className="homeSectionDesc">Welcome to Gadets store</h1>
       </section>
       <div className="homeHeading">
         <h1>LATEST PRODUCTS</h1>

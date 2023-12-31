@@ -15,6 +15,22 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
+    opacity: 0.8;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.homeSectionDesc{
+    padding: 8px;
+    position: absolute;
+    color: white;
+    font-size: 3rem;
+
+    @media screen and (max-width: 800px) {
+        font-size: 1.5rem;
+    }
 }
 
 .homeHeading{
@@ -64,8 +80,6 @@
 
 .homeProductIMG{
     object-fit: contain;
-    // border-radius: 15px;
-    // mix-blend-mode:color;
     @include square(calc(18rem - 3rem));
 }
 
@@ -87,7 +101,6 @@
         background-color: $color3;
         font-size: 1.1rem;
         transition: all 0.3s;
-        // padding: 10px;
 
         &:hover{
             rotate: 20deg;
