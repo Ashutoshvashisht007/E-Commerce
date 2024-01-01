@@ -1,6 +1,7 @@
 import iphone14 from "../assets/images/iphone14.png"
 import { useEffect, useState } from "react";
 import CartItem from "../components/CartItem";
+import { Link } from "react-router-dom";
 
 interface productCard{
   id: number,
@@ -29,6 +30,36 @@ const products: productCard[] = [
     title: "iPhone 14",
     price: 100
   },
+  {
+    id: 4,
+    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
+    title: "iPhone 14",
+    price: 100
+  },
+  {
+    id: 5,
+    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
+    title: "iPhone 14",
+    price: 100
+  },
+  {
+    id: 6,
+    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
+    title: "iPhone 14",
+    price: 100
+  },
+  {
+    id: 7,
+    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
+    title: "iPhone 14",
+    price: 100
+  },
+  {
+    id: 8,
+    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
+    title: "iPhone 14",
+    price: 100
+  },
 
 ]
 
@@ -53,9 +84,10 @@ const Cart = () => {
     <div className="cart">
       <main className="cartLeftContainer">
         {
-          products.map((product: productCard)=>
+
+          products.length > 0 ? (products.map((product: productCard)=>
             <CartItem key={product.id} productId={product.id} image={product.image} title={product.title} price={product.price}/>
-          )
+          )) : <h1>No Items Added</h1>
         }
       </main>
 
@@ -72,13 +104,17 @@ const Cart = () => {
           couponCode && 
             (isValidCouponCode ? 
               (
-                <span className="green">$10 off using <code>{couponCode}</code></span>
+                <span className="green greenText">$10 off using <code>{couponCode}</code></span>
               ) : (
-                <span className="red">Invalid Coupon Code</span>
+                <span className="red redText">Invalid Coupon Code</span>
               ))
         }
 
-        <button className="cartCouponBtn">Submit</button>
+        {
+          products.length > 0 && <Link to="/shipping">
+            <button className="cartCouponBtn">Check Out</button>
+          </Link>
+        }
       </aside>
 
     </div>

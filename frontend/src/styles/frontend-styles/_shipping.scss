@@ -1,0 +1,27 @@
+.shipping{
+    padding: 10px;
+    @include flex(row,space-between,flex-start,2rem);
+    width: 100%;
+    height: calc(100vh - 4rem);
+}
+
+.shippingForm{
+    @include flex(column,center,center,2rem);
+    width: 50%;
+
+    >input{
+        padding: 10px;
+        width: 70%;
+        border: none;
+        border-bottom: 1px solid #555;
+    }
+}
+
+.shippingSubmitBtn{
+    padding: 15px;
+    border-radius: 5px;
+    border: none;
+    background-color: $color3;
+    color: $color1;
+    cursor: pointer;
+}
