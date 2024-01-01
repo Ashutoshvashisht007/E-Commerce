@@ -36,6 +36,7 @@
   @import "frontend-styles/home";
   @import "frontend-styles/cart";
   @import "frontend-styles/shipping";
+  @import "frontend-styles/login";
   
   @import "admin-styles/dashboard";
   @import "admin-styles/products";
@@ -82,6 +83,7 @@
         position: absolute;
         left: calc(100% - 160px);
         top: 8%;
+        z-index: 999;
         > div{
             @include flex(row,space-evenly,center,2)
         }

@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react"
 import Loader from "./components/Loader"
 import Header from "./components/Header"
 import Shipping from "./pages/Shipping"
+import Login from "./pages/Login"
 
 const Home = lazy(() => import("./pages/Home"))
 const Search = lazy(() => import("./pages/Search"))
@@ -39,6 +40,10 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
           <Route path="/cart" element={<Cart />} />
+
+          {/* Not Logged In Route */}
+
+          <Route path="/signin" element={<Login/>}/>
 
           {/* Logged In user routes */}
 
