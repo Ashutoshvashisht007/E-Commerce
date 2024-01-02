@@ -37,15 +37,14 @@
   @import "frontend-styles/cart";
   @import "frontend-styles/shipping";
   @import "frontend-styles/login";
+  @import "frontend-styles/search";
+  @import "frontend-styles/order";
   
   @import "admin-styles/dashboard";
   @import "admin-styles/products";
   @import "admin-styles/chart";
   @import "admin-styles/dashboardapp";
   @import "admin-styles/mediaquery";
-
-
-
 
   .header{
     @include flex(row,space-between,center,1);

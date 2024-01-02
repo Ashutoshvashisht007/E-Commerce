@@ -54,20 +54,20 @@
     margin-top: 20px;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 1.5rem;
     flex-wrap: wrap;
-    // position: relative;
     overflow-x: auto;
-    &::-webkit-scrollbar{
-        display: none;
-    }
+}
+
+.homeProducts::--webkit-scrollbar{
+    display: none;
 }
 
 .homeProduct{
     // background-color: white;
-    flex: none;
-    height: 25rem;
-    width: 18rem;
+    height: 16rem;
+    width: 15rem;
     padding: 10px;
     @include flex(column,flex-start,center,1rem);
     position: relative;
@@ -80,7 +80,9 @@
 
 .homeProductIMG{
     object-fit: contain;
-    @include square(calc(18rem - 3rem));
+    // @include square(calc(18rem - 3rem));
+    height: 10rem;
+    width: 10rem;
 }
 
 .productBtn{
