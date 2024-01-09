@@ -1,9 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 
-export interface Params{
-    id: string
-}
-
 export interface newUserRequestBody {
     name: string;
     email: string;
@@ -11,6 +7,13 @@ export interface newUserRequestBody {
     gender: string;
     _id: string;
     dob: Date;
+}
+
+export interface newProductRequestBody {
+    name: string;
+    price: number;
+    stock: number;
+    category: string;
 }
 
 export type Controller = (

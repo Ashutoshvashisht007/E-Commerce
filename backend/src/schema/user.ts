@@ -7,7 +7,7 @@ interface IUser extends Document {
     name: string;
     email: string;
     photo: string;
-    role: "admin | user";
+    role: "admin" | "user";
     gender: "male | female | others";
     dob: Date;
     createdAt: Date;

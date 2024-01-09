@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../schema/User.js";
-import { Params, newUserRequestBody } from "../types/Types.js";
+import { newUserRequestBody } from "../types/Types.js";
 import { TryCatchBlockWrapper } from "../middlewares/Error.js";
 import ErrorHandler from "../utils/Utility_Class.js";
 
