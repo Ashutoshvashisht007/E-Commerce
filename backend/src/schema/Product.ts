@@ -1,27 +1,26 @@
 import mongoose from "mongoose";
-import { execPath } from "process";
 
 const schema = new mongoose.Schema(
     {
         name: {
             type: String,
-            // required: [true, "Please Enter Name"]
+            required: [true, "Please Enter Name"]
         },
         photo: {
             type: String,
-            // required: [true, "Please Enter Photo"]
+            required: [true, "Please Enter Photo"]
         },
         price: {
             type: Number,
-            // required: [true, "Please Enter Price"]
+            required: [true, "Please Enter Price"]
         },
         stock: {
             type: Number,
-            // required: [true, "Please Enter Stock"]
+            required: [true, "Please Enter Stock"]
         },
         category: {
             type: String,
-            // required: [true, "Please Enter Category"],
+            required: [true, "Please Enter Category"],
             trim: true,
         },
     },
