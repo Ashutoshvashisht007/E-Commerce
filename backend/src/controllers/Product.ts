@@ -1,57 +1,55 @@
 import { Request } from "express";
 import { TryCatchBlockWrapper } from "../middlewares/Error.js";
-import { SearchRequestQuery, newProductRequestBody } from "../types/Types.js";
+import { BaseQuery, SearchRequestQuery, newProductRequestBody } from "../types/Types.js";
 import { Product } from "../schema/Product.js";
 import ErrorHandler from "../utils/Utility_Class.js";
 import { rm } from "fs";
 
 export const newProduct = TryCatchBlockWrapper(
-    async(
-        req:Request<{},{},newProductRequestBody> ,
+    async (
+        req: Request<{}, {}, newProductRequestBody>,
         res,
-        next)=>{
-        
-            const {name, price, stock, category} = req.body;
-            const photo = req.file;
+        next) => {
 
-            if(!photo)
-            {
-                return next(new ErrorHandler("No photo Added",400));
-            }
+        const { name, price, stock, category } = req.body;
+        const photo = req.file;
 
-            if(!name || !price || !stock || !category)
-            {
+        if (!photo) {
+            return next(new ErrorHandler("No photo Added", 400));
+        }
 
-                rm(photo.path, ()=> {
-                    // console.log("Deleted");
-                }) 
+        if (!name || !price || !stock || !category) {
 
-                return next(new ErrorHandler("Please enter all fields",400));
-            }
-
-            await Product.create({
-                name,
-                photo: photo.path,
-                price,
-                stock,
-                category: category.toLowerCase(),
-            });
-
-            return res.status(201).json({
-                success: "true",
-                message: "Product created successfully"
+            rm(photo.path, () => {
+                // console.log("Deleted");
             })
+
+            return next(new ErrorHandler("Please enter all fields", 400));
+        }
+
+        await Product.create({
+            name,
+            photo: photo.path,
+            price,
+            stock,
+            category: category.toLowerCase(),
+        });
+
+        return res.status(201).json({
+            success: "true",
+            message: "Product created successfully"
+        })
     }
 );
 
 export const getLatestProducts = TryCatchBlockWrapper(
-    async(
-        req: Request<{},{}, newProductRequestBody>,
+    async (
+        req: Request<{}, {}, newProductRequestBody>,
         res,
         next,
-    ) =>{
+    ) => {
 
-        const products = await Product.find({}).sort({createdAt: -1}).limit(5);
+        const products = await Product.find({}).sort({ createdAt: -1 }).limit(5);
 
         return res.status(201).json({
             succes: true,
@@ -61,11 +59,11 @@ export const getLatestProducts = TryCatchBlockWrapper(
 );
 
 export const getAllCategories = TryCatchBlockWrapper(
-    async(
-        req: Request<{},{}, newProductRequestBody>,
+    async (
+        req: Request<{}, {}, newProductRequestBody>,
         res,
         next,
-    ) =>{
+    ) => {
 
         const categories = await Product.distinct("category");
 
@@ -77,11 +75,11 @@ export const getAllCategories = TryCatchBlockWrapper(
 )
 
 export const getAdminProducts = TryCatchBlockWrapper(
-    async(
-        req: Request<{},{}, newProductRequestBody>,
+    async (
+        req: Request<{}, {}, newProductRequestBody>,
         res,
         next,
-    ) =>{
+    ) => {
 
         const products = await Product.find({});
 
@@ -93,17 +91,16 @@ export const getAdminProducts = TryCatchBlockWrapper(
 );
 
 export const getSingleProduct = TryCatchBlockWrapper(
-    async(
+    async (
         req,
         res,
         next,
-    ) =>{
+    ) => {
 
         const product = await Product.findById(req.params.id);
 
-        if(!product)
-        {
-            return next(new ErrorHandler("Invalid Product ID",400));
+        if (!product) {
+            return next(new ErrorHandler("Invalid Product ID", 400));
         }
 
         return res.status(201).json({
@@ -116,74 +113,67 @@ export const getSingleProduct = TryCatchBlockWrapper(
 
 
 export const updateProduct = TryCatchBlockWrapper(
-    async(
+    async (
         req,
         res,
-        next)=>{
+        next) => {
 
-            const {id} = req.params;
-        
-            const {name, price, stock, category} = req.body;
-            const photo = req.file;
+        const { id } = req.params;
 
-            const product = await Product.findById(id);
+        const { name, price, stock, category } = req.body;
+        const photo = req.file;
 
-            if(!product)
-            {
-                return next(new ErrorHandler("Invalid Product ID",400));
-            }
+        const product = await Product.findById(id);
 
-            if(photo)
-            {
+        if (!product) {
+            return next(new ErrorHandler("Invalid Product ID", 400));
+        }
 
-                rm(product.photo!, ()=> {
-                    console.log("Deleted");
-                });
+        if (photo) {
 
-                product.photo = photo.path;
-            }
+            rm(product.photo!, () => {
+                console.log("Deleted");
+            });
 
-            if(name)
-            {
-                product.name = name;
-            }
-            if(price)
-            {
-                product.price = price;
-            }
-            if(stock)
-            {
-                product.stock = stock;
-            }
-            if(category)
-            {
-                product.category = category;
-            }
+            product.photo = photo.path;
+        }
 
-            await product.save();
+        if (name) {
+            product.name = name;
+        }
+        if (price) {
+            product.price = price;
+        }
+        if (stock) {
+            product.stock = stock;
+        }
+        if (category) {
+            product.category = category;
+        }
 
-            return res.status(200).json({
-                success: "true",
-                message: "Product updated successfully"
-            })
+        await product.save();
+
+        return res.status(200).json({
+            success: "true",
+            message: "Product updated successfully"
+        })
     }
 );
 
 export const deleteProduct = TryCatchBlockWrapper(
-    async(
+    async (
         req,
         res,
         next,
-    ) =>{
+    ) => {
 
         const product = await Product.findById(req.params.id);
 
-        if(!product)
-        {
-            return next(new ErrorHandler("Invalid Product ID",400));
+        if (!product) {
+            return next(new ErrorHandler("Invalid Product ID", 400));
         }
 
-        rm(product.photo!, ()=> {
+        rm(product.photo!, () => {
             console.log("Product Photo Deleted");
         });
 
@@ -198,41 +188,52 @@ export const deleteProduct = TryCatchBlockWrapper(
 
 
 export const getAllProducts = TryCatchBlockWrapper(
-    async(
-        req: Request<{},{},{},SearchRequestQuery>,
+    async (
+        req: Request<{}, {}, {}, SearchRequestQuery>,
         res,
         next,
-    ) =>{
+    ) => {
 
-        const {search,sort,category,price} = req.query;
+        const { search, sort, category, price } = req.query;
 
         const page = Number(req.query.page) || 1;
 
         const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
         const skip = limit * (page - 1);
 
-        const baseQuery = {
-            name:{
-                 
-            },
-            price: {
-                $lte: Number(price), // lte = less than equal
-            },
-            category,
-        }
+        const baseQuery: BaseQuery = {}
 
-        if(search){
+        if (search) {
             baseQuery.name = {
                 $regex: search,
                 $options: "i", //case sensitive
             }
         }
 
-        const products = await Product.find(baseQuery);
+        if (price) {
+            baseQuery.price = {
+                $lte: Number(price) // lte = less than equal
+            }
+        }
+
+        if (category) {
+            baseQuery.category = category;
+        }
+
+        const [products, filteredProducts] = await Promise.all([
+            Product.find(baseQuery).sort(
+                sort && { price: sort === "asc" ? 1 : -1 }
+            ).limit(limit).skip(skip),
+
+            Product.find(baseQuery)
+        ]);
+
+        const totalPage = Math.ceil(filteredProducts.length / limit);
 
         return res.status(201).json({
             succes: true,
-            products
+            products,
+            totalPage,
         })
     }
 );
