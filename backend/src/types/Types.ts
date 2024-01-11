@@ -7,8 +7,7 @@ export interface newUserRequestBody {
     gender: string;
     _id: string;
     dob: Date;
-}
-
+} 
 export interface newProductRequestBody {
     name: string;
     price: number;
@@ -20,4 +19,12 @@ export type Controller = (
     req: Request, 
     res: Response, 
     next: NextFunction
-    ) => Promise<void | Response<any, Record<string, any>>>  
+    ) => Promise<void | Response<any, Record<string, any>>> ;
+
+export type SearchRequestQuery = {
+    search?: string,
+    price?: string,
+    category?: string,
+    sort?: string,
+    page?: string,
+}

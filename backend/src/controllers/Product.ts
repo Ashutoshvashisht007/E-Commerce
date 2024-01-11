@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { TryCatchBlockWrapper } from "../middlewares/Error.js";
-import { newProductRequestBody } from "../types/Types.js";
+import { SearchRequestQuery, newProductRequestBody } from "../types/Types.js";
 import { Product } from "../schema/Product.js";
 import ErrorHandler from "../utils/Utility_Class.js";
 import { rm } from "fs";
@@ -62,7 +62,7 @@ export const getLatestProducts = TryCatchBlockWrapper(
 
 export const getAllCategories = TryCatchBlockWrapper(
     async(
-        req,
+        req: Request<{},{}, newProductRequestBody>,
         res,
         next,
     ) =>{
@@ -78,7 +78,7 @@ export const getAllCategories = TryCatchBlockWrapper(
 
 export const getAdminProducts = TryCatchBlockWrapper(
     async(
-        req,
+        req: Request<{},{}, newProductRequestBody>,
         res,
         next,
     ) =>{
@@ -101,12 +101,19 @@ export const getSingleProduct = TryCatchBlockWrapper(
 
         const product = await Product.findById(req.params.id);
 
+        if(!product)
+        {
+            return next(new ErrorHandler("Invalid Product ID",400));
+        }
+
         return res.status(201).json({
             succes: true,
             product
         })
     }
 );
+
+
 
 export const updateProduct = TryCatchBlockWrapper(
     async(
@@ -123,27 +130,109 @@ export const updateProduct = TryCatchBlockWrapper(
 
             if(!product)
             {
-                next(new ErrorHandler("Invalid Product ID",400));
+                return next(new ErrorHandler("Invalid Product ID",400));
             }
 
-            // if(photo)
-            // {
+            if(photo)
+            {
 
-            //     rm(product.photo!, ()=> {
-            //         // console.log("Deleted");
-            //     });
+                rm(product.photo!, ()=> {
+                    console.log("Deleted");
+                });
 
-            //     product.photo = photo.path;
-            // }
+                product.photo = photo.path;
+            }
 
-            // if(name)
-            // {
-            //     product.name = name;
-            // }
+            if(name)
+            {
+                product.name = name;
+            }
+            if(price)
+            {
+                product.price = price;
+            }
+            if(stock)
+            {
+                product.stock = stock;
+            }
+            if(category)
+            {
+                product.category = category;
+            }
 
-            return res.status(201).json({
+            await product.save();
+
+            return res.status(200).json({
                 success: "true",
-                message: "Product created successfully"
+                message: "Product updated successfully"
             })
+    }
+);
+
+export const deleteProduct = TryCatchBlockWrapper(
+    async(
+        req,
+        res,
+        next,
+    ) =>{
+
+        const product = await Product.findById(req.params.id);
+
+        if(!product)
+        {
+            return next(new ErrorHandler("Invalid Product ID",400));
+        }
+
+        rm(product.photo!, ()=> {
+            console.log("Product Photo Deleted");
+        });
+
+        await Product.deleteOne();
+
+        return res.status(200).json({
+            succes: true,
+            message: "Product deleted successfully"
+        })
+    }
+);
+
+
+export const getAllProducts = TryCatchBlockWrapper(
+    async(
+        req: Request<{},{},{},SearchRequestQuery>,
+        res,
+        next,
+    ) =>{
+
+        const {search,sort,category,price} = req.query;
+
+        const page = Number(req.query.page) || 1;
+
+        const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
+        const skip = limit * (page - 1);
+
+        const baseQuery = {
+            name:{
+                 
+            },
+            price: {
+                $lte: Number(price), // lte = less than equal
+            },
+            category,
+        }
+
+        if(search){
+            baseQuery.name = {
+                $regex: search,
+                $options: "i", //case sensitive
+            }
+        }
+
+        const products = await Product.find(baseQuery);
+
+        return res.status(201).json({
+            succes: true,
+            products
+        })
     }
 );
