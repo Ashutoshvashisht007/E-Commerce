@@ -1,13 +1,18 @@
 import express from "express";
+import NodeCache from "node-cache";
+import { connectDB } from "./utils/Features.js";
+import { errorMiddleware } from "./middlewares/Error.js";
+
 
 // importing Routes
 import userRoute from "./routes/User.js"
 import userProducts from "./routes/Products.js"
-import { connectDB } from "./utils/Features.js";
-import { errorMiddleware } from "./middlewares/Error.js";
 
 const port =  3000;
 connectDB();
+
+export const nodeCache = new NodeCache();
+
 const app = express();
 app.use(express.json());
 

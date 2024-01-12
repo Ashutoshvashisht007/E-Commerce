@@ -39,3 +39,9 @@ export interface BaseQuery {
     };
     category?: string | undefined;
 }
+
+export type InvalidateCacheProps = {
+    product?: boolean;
+    order?: boolean;
+    admin?: boolean;
+}
