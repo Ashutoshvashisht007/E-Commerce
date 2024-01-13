@@ -4,6 +4,7 @@ import { NewOrderRequestBody } from "../types/Types.js";
 import { Order } from "../schema/Order.js";
 import { invalidatesCache, reduceStock } from "../utils/Features.js";
 import ErrorHandler from "../utils/Utility_Class.js";
+import { nodeCache } from "../app.js";
 
 
 export const newOrder = TryCatchBlockWrapper(
@@ -26,10 +27,163 @@ export const newOrder = TryCatchBlockWrapper(
 
     await reduceStock(orderItems);
 
-    await invalidatesCache({product : true, order: true, admin: true});
+    await invalidatesCache({product : true, order: true, admin: true, userId: user});
 
     return res.status(201).json({
-        success: "Order Placed Successfuly",
+        success: true,
+        message: "Order Placed Successfuly",
     })
 
-})
+});
+
+export const myOrders = TryCatchBlockWrapper(
+    async (
+        req,
+        res,
+        next,
+    )=>{
+
+    const {id: user} = req.query;
+
+    let orders = [];
+
+    if(nodeCache.has(`my-Orders-${user}`))
+    {
+        orders = JSON.parse(nodeCache.get(`my-Orders-${user}`) as string);
+    }
+    else
+    {
+        orders = await Order.find({
+            user
+        });
+        nodeCache.set(`my-Orders-${user}`,JSON.stringify(orders));
+    }
+
+    return res.status(200).json({
+        success: true,
+        orders
+    })
+
+});
+
+export const allOrders = TryCatchBlockWrapper(
+    async (
+        req,
+        res,
+        next,
+    )=>{
+
+    let orders = [];
+
+    if(nodeCache.has("all-orders"))
+    {
+        orders = JSON.parse(nodeCache.get("all-orders") as string);
+    }
+    else
+    {
+        orders = await Order.find().populate("user","name");
+        nodeCache.set("all-orders",JSON.stringify(orders));
+    }
+
+    return res.status(200).json({
+        success: true,
+        orders
+    })
+
+});
+
+export const getSingleOrder = TryCatchBlockWrapper(
+    async (
+        req,
+        res,
+        next,
+    )=>{
+
+    const {id} = req.params;
+    const key = `order-${id}`;
+
+    let order;
+
+    if(nodeCache.has(key))
+    {
+        order = JSON.parse(nodeCache.get(key) as string);
+    }
+    else
+    {
+        order = await Order.findById(id).populate("user","name");
+        if(!order)
+        {
+            return next(new ErrorHandler("Order not found", 404));
+        }
+        nodeCache.set(key,JSON.stringify(order));
+    }
+
+    return res.status(200).json({
+        success: true,
+        order
+    })
+
+});
+
+
+export const processOrder = TryCatchBlockWrapper(
+    async (
+        req,
+        res,
+        next,
+    )=>{
+
+    const {id} = req.params;
+
+    const order = await Order.findById(id);
+
+    if(!order)
+    {
+        return next(new ErrorHandler("Order not found", 404));
+    }
+    
+    if(order.status === "Processing")
+    {
+        order.status = "Shipped";
+    }
+    else if(order.status === "Shipped")
+    {
+        order.status = "Delivered"
+    }
+
+    await order.save();
+
+    await invalidatesCache({product : false, order: true, admin: true, userId: order.user});
+
+    return res.status(200).json({
+        success: true,
+        message: "Order Processed Successfully"
+    })
+
+});
+
+export const deleteOrder = TryCatchBlockWrapper(
+    async (
+        req,
+        res,
+        next,
+    )=>{
+
+    const {id} = req.params;
+
+    const order = await Order.findById(id);
+
+    if(!order)
+    {
+        return next(new ErrorHandler("Order not found", 404));
+    }
+    
+    await order.deleteOne();
+    await invalidatesCache({product : false, order: true, admin: true, userId: order.user});
+
+    return res.status(200).json({
+        success: true,
+        message: "Order Deleted Successfully"
+    })
+
+});
