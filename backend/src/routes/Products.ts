@@ -13,6 +13,6 @@ app.get("/admin-products",adminOnly, getAdminProducts);
 
 app.get("/:id",getSingleProduct);
 app.put("/:id",adminOnly,singleUpload, updateProduct);
-app.delete("/:id",deleteProduct);
+app.delete("/:id",adminOnly, deleteProduct);
 
 export default app;

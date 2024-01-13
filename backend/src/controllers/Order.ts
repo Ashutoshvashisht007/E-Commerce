@@ -21,13 +21,17 @@ export const newOrder = TryCatchBlockWrapper(
         return next(new ErrorHandler("Please Enter All fields",400)); 
     }
 
-    await Order.create({
+    const order = await Order.create({
         shippingInfo, orderItems, user, subtotal, tax, shippingCharges, discount, total
     });
 
     await reduceStock(orderItems);
-
-    await invalidatesCache({product : true, order: true, admin: true, userId: user});
+    const temp = order.orderItems.map((e)=>
+        String(e.productId)
+    )
+    await invalidatesCache({
+        product : true, order: true, admin: true, userId: user, productId: temp
+    });
 
     return res.status(201).json({
         success: true,
@@ -153,7 +157,7 @@ export const processOrder = TryCatchBlockWrapper(
 
     await order.save();
 
-    await invalidatesCache({product : false, order: true, admin: true, userId: order.user});
+    await invalidatesCache({product : false, order: true, admin: true, userId: order.user, orderId: String(order._id)});
 
     return res.status(200).json({
         success: true,
@@ -179,7 +183,7 @@ export const deleteOrder = TryCatchBlockWrapper(
     }
     
     await order.deleteOne();
-    await invalidatesCache({product : false, order: true, admin: true, userId: order.user});
+    await invalidatesCache({product : false, order: true, admin: true, userId: order.user, orderId: String(order._id)});
 
     return res.status(200).json({
         success: true,

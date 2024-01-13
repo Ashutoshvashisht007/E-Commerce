@@ -29,13 +29,13 @@ export const newProduct = TryCatchBlockWrapper(
             return next(new ErrorHandler("Please enter all fields", 400));
         }
 
-        await Product.create({
+        const product = await Product.create({
             name,
             photo: photo.path,
             price,
             stock,
             category: category.toLowerCase(),
-        });
+        })
 
         await invalidatesCache({product: true});
 
@@ -198,7 +198,7 @@ export const updateProduct = TryCatchBlockWrapper(
 
         await product.save();
 
-        await invalidatesCache({product: true});
+        await invalidatesCache({product: true, productId: String(product._id)});
 
         return res.status(200).json({
             success: "true",
@@ -226,7 +226,7 @@ export const deleteProduct = TryCatchBlockWrapper(
 
         await Product.deleteOne();
 
-        await invalidatesCache({product: true});
+        await invalidatesCache({product: true, productId: String(product._id)});
 
         return res.status(200).json({
             succes: true,
