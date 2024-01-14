@@ -214,7 +214,9 @@ export const deleteProduct = TryCatchBlockWrapper(
         next,
     ) => {
 
-        const product = await Product.findById(req.params.id);
+        const {id} = req.params;
+
+        const product = await Product.findById(id);
 
         if (!product) {
             return next(new ErrorHandler("Invalid Product ID", 400));
