@@ -20,6 +20,9 @@ export const dashboardStats = TryCatchBlockWrapper(
         }
         else {
             const today = new Date();
+            const sixMonthAgo = new Date();
+
+            sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
 
             const thisMonth = {
                 start: new Date(today.getFullYear(), today.getMonth(), 1), // starting date of this month
@@ -73,7 +76,18 @@ export const dashboardStats = TryCatchBlockWrapper(
                 },
             });
 
-            const [monthProducts, monthUsers, monthOrders, prevProducts, prevUsers, prevOrders, productsCount, usersCount, allOrders] = await Promise.all(
+            // last six month 
+
+            const sixMonthOrders = Order.find({
+                createdAt: {
+                    $gte: sixMonthAgo,
+                    $lte: today,
+                }
+            });
+
+            const latestTransaction = Order.find({}).select(["orderItems", "total", "discount", "status"]).limit(4);
+
+            const [monthProducts, monthUsers, monthOrders, prevProducts, prevUsers, prevOrders, productsCount, usersCount, allOrders, prevSixMonthOrders, categories, femaleCount, maleCount, transactions] = await Promise.all(
                 [
                     thisMonthProducts,
                     thisMonthUsers,
@@ -84,41 +98,46 @@ export const dashboardStats = TryCatchBlockWrapper(
                     Product.countDocuments(),
                     User.countDocuments(),
                     Order.find({}).select("total"),
+                    sixMonthOrders,
+                    Product.distinct("category"),
+                    User.countDocuments({ gender: "female" }),
+                    User.countDocuments({ gender: "male" }),
+                    latestTransaction,
                 ]
             );
 
             const MonthRevenue = monthOrders.reduce(
-                (total,order) => total + (order.total || 0), 0
-                );
+                (total, order) => total + (order.total || 0), 0
+            );
             const prevMonthRevenue = prevOrders.reduce(
-                (total,order) => total + (order.total || 0), 0
-                );
+                (total, order) => total + (order.total || 0), 0
+            );
 
             const precent = {
 
-                revenue: calculatePercentage(MonthRevenue,prevMonthRevenue),
+                revenue: calculatePercentage(MonthRevenue, prevMonthRevenue),
 
                 product: calculatePercentage(
-                         monthProducts.length, 
-                         prevProducts.length
-                         ),
+                    monthProducts.length,
+                    prevProducts.length
+                ),
 
-          
-                         user: calculatePercentage(
-                      monthUsers.length, 
-                      prevUsers.length
-                      ),
-                
+
+                user: calculatePercentage(
+                    monthUsers.length,
+                    prevUsers.length
+                ),
+
                 order: calculatePercentage(
-                       monthOrders.length, 
-                       prevOrders.length
-                       ),
+                    monthOrders.length,
+                    prevOrders.length
+                ),
 
             };
 
             const Revenue = allOrders.reduce(
-                (total,order) => total + (order.total || 0), 0
-                );
+                (total, order) => total + (order.total || 0), 0
+            );
 
             const count = {
                 revenue: Revenue,
@@ -127,11 +146,60 @@ export const dashboardStats = TryCatchBlockWrapper(
                 order: allOrders.length,
             }
 
-            stats = {
-                precent,
-                count
+            const orderMonthCounts = new Array(6).fill(0);
+            const orderMonthRevenue = new Array(6).fill(0);
+
+            prevSixMonthOrders.forEach((order) => {
+                const orderCreated = order.createdAt;
+                const monthDiff = today.getMonth() - orderCreated.getMonth();
+
+                if (monthDiff < 6) {
+                    orderMonthCounts[6 - monthDiff - 1] += 1;
+                    orderMonthRevenue[6 - monthDiff - 1] += order.total;
+                }
+            });
+
+            const countCategoriesArr = categories.map((category) =>
+                Product.countDocuments({ category })
+            );
+
+            const countCategory = await Promise.all(countCategoriesArr);
+
+            const releationOfCategories: Record<string, number>[] = [];
+
+            categories.forEach((category, idx) => {
+                releationOfCategories.push({
+                    [category]: Math.round((countCategory[idx] / productsCount) * 100),
+                });
+            });
+
+            const genderRatio = {
+                male: maleCount,
+                female: femaleCount,
+                others: usersCount - (maleCount + femaleCount),
             }
 
+            const modifiedTransanction = transactions.map(idx => ({
+                _id: idx._id,
+                discount: idx.discount,
+                total: idx.total,
+                status: idx.status,
+                quantity: idx.orderItems.length
+            }))
+
+            stats = {
+                releationOfCategories,
+                precent,
+                count,
+                chart: {
+                    order: orderMonthCounts,
+                    revenue: orderMonthRevenue,
+                },
+                genderRatio,
+                latesttransactions: modifiedTransanction,
+            };
+
+            nodeCache.set("admin-stats", JSON.stringify(stats));
         }
 
         return res.status(200).json({
@@ -141,11 +209,42 @@ export const dashboardStats = TryCatchBlockWrapper(
 
     }
 );
-export const dashboardPie = TryCatchBlockWrapper(
-    async () => {
 
+
+export const dashboardPie = TryCatchBlockWrapper(
+    async (req, res, next) => {
+
+        let charts;
+
+        if (nodeCache.has("admit-pie-charts")) {
+            charts = JSON.parse(nodeCache.get("admin-pie-charts") as string);
+        }
+        else {
+            const productStatus = await Order.find({}).select("status");
+            const len = productStatus.length;
+
+            const [processingCount,shippingCount,deliveredCount] = await Promise.all([
+                Order.countDocuments({status: "Processing"}),
+                Order.countDocuments({status: "Shipped"}),
+                Order.countDocuments({status: "Delivered"}),
+            ])
+
+            charts = {
+                processingRatio: Math.round((processingCount / len) * 100),
+                shippedRatio: Math.round((shippingCount / len) * 100),
+                deliveredRatio: Math.round((deliveredCount / len) * 100),
+            }
+        }
+
+
+        return res.status(200).json({
+            success: true,
+            charts,
+        })
     }
 );
+
+
 export const dashboardBar = TryCatchBlockWrapper(
     async () => {
 
