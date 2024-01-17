@@ -37,7 +37,7 @@ export const newProduct = TryCatchBlockWrapper(
             category: category.toLowerCase(),
         })
 
-        await invalidatesCache({product: true});
+        invalidatesCache({product: true, admin: true});
 
         return res.status(201).json({
             success: "true",
@@ -198,7 +198,7 @@ export const updateProduct = TryCatchBlockWrapper(
 
         await product.save();
 
-        await invalidatesCache({product: true, productId: String(product._id)});
+        invalidatesCache({product: true, productId: String(product._id), admin: true});
 
         return res.status(200).json({
             success: "true",
@@ -228,7 +228,7 @@ export const deleteProduct = TryCatchBlockWrapper(
 
         await Product.deleteOne();
 
-        await invalidatesCache({product: true, productId: String(product._id)});
+        invalidatesCache({product: true, productId: String(product._id),admin: true}, );
 
         return res.status(200).json({
             succes: true,

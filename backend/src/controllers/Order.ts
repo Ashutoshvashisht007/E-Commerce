@@ -29,7 +29,7 @@ export const newOrder = TryCatchBlockWrapper(
     const temp = order.orderItems.map((e)=>
         String(e.productId)
     )
-    await invalidatesCache({
+    invalidatesCache({
         product : true, order: true, admin: true, userId: user, productId: temp
     });
 
@@ -157,7 +157,7 @@ export const processOrder = TryCatchBlockWrapper(
 
     await order.save();
 
-    await invalidatesCache({product : false, order: true, admin: true, userId: order.user, orderId: String(order._id)});
+    invalidatesCache({product : false, order: true, admin: true, userId: order.user, orderId: String(order._id)});
 
     return res.status(200).json({
         success: true,
@@ -183,7 +183,7 @@ export const deleteOrder = TryCatchBlockWrapper(
     }
     
     await order.deleteOne();
-    await invalidatesCache({product : false, order: true, admin: true, userId: order.user, orderId: String(order._id)});
+    invalidatesCache({product : false, order: true, admin: true, userId: order.user, orderId: String(order._id)});
 
     return res.status(200).json({
         success: true,

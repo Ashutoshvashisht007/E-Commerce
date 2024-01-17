@@ -376,7 +376,59 @@ export const dashboardBar = TryCatchBlockWrapper(
     }
 );
 export const dashboardLine = TryCatchBlockWrapper(
-    async () => {
+    async (req,res,next) => {
+        let charts;
+        const key = "admin-line-charts";
 
+        if(nodeCache.has(key))
+        {
+            charts = JSON.parse(nodeCache.get(key) as string);
+        }
+        else
+        {
+
+            const today = new Date();
+
+            const twelveMonthAgo = new Date();
+            twelveMonthAgo.setMonth(twelveMonthAgo.getMonth() - 12); 
+
+            const lasttwelveMonthProducts = Product.find({createdAt:{
+                $gte: twelveMonthAgo,
+                $lte: today
+            }}).select("createdAt");
+            const lasttwelveMonthUsers = User.find({createdAt:{
+                $gte: twelveMonthAgo,
+                $lte: today
+            }}).select("createdAt");
+            const lasttwelveMonthOrdes = Order.find({createdAt:{
+                $gte: twelveMonthAgo,
+                $lte: today
+            }}).select(["createdAt","discount","total"]);
+
+            const [twelveMonthProducts,twelveMonthUsers,twelveMonthOrders] = await Promise.all([
+                lasttwelveMonthProducts,
+                lasttwelveMonthUsers,
+                lasttwelveMonthOrdes,
+            ]);
+
+            const productsCount = getChartData({length: 12, docArr: twelveMonthProducts}); 
+            const usersCount = getChartData({length: 12, docArr: twelveMonthUsers});
+            const discount = getChartData({length: 12, docArr: twelveMonthOrders, property: "discount"});
+            const revenue = getChartData({length: 12, docArr: twelveMonthOrders, property: "total"});
+
+            charts = {
+                users: usersCount,
+                products: productsCount,
+                discount,
+                revenue,
+            };
+
+            nodeCache.set(key,JSON.stringify(charts));
+        }
+
+        return res.status(200).json({
+            success: true,
+            charts,
+        })
     }
 );

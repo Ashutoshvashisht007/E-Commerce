@@ -10,7 +10,7 @@ export const connectDB = (uri: string) => {
     }).then(connect => console.log(`DataBase Connected to ${connect.connection.host}`)).catch(e => console.log(e));
 };
 
-export const invalidatesCache = async ({ product, order, admin, userId, orderId, productId }: InvalidateCacheProps) => {
+export const invalidatesCache = ({ product, order, admin, userId, orderId, productId }: InvalidateCacheProps) => {
     if (product) {
         const productKeys: string[] = ["latest-product", "categories", "admin-products"];
 
@@ -29,6 +29,14 @@ export const invalidatesCache = async ({ product, order, admin, userId, orderId,
         const ordersKeys: string[] = ["all-orders", `my-Orders-${userId}`, `order-${orderId}`];
 
         nodeCache.del(ordersKeys)
+    }
+    if (admin) {
+        nodeCache.del([
+            "admin-stats",
+            "admin-pie-charts",
+            "admin-bar-charts",
+            "admin-line-charts"
+        ]);
     }
 };
 
@@ -57,14 +65,17 @@ export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
 
 interface MyDocument extends Document {
     createdAt: Date;
-}  
-
-type getChartDataProps = {
-    length: number; 
-    docArr: MyDocument[];
+    discount?: number,
+    total?: number
 }
 
-export const getChartData = ({length, docArr}: getChartDataProps) => {
+type getChartDataProps = {
+    length: number;
+    docArr: MyDocument[];
+    property?: "discount" | "total"
+}
+
+export const getChartData = ({ length, docArr, property }: getChartDataProps) => {
     const data: number[] = new Array(length).fill(0);
     const today = new Date();
 
@@ -73,7 +84,13 @@ export const getChartData = ({length, docArr}: getChartDataProps) => {
         const monthDiff = ((today.getMonth() - Created.getMonth()) + 12) % 12;
 
         if (monthDiff < length) {
-            data[length - monthDiff - 1] += 1;
+            if (property) {
+                data[length - monthDiff - 1] += idx[property]!;
+            }
+            else {
+                data[length - monthDiff - 1] += 1;
+            }
+
         }
     });
 

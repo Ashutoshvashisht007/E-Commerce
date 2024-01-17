@@ -4,6 +4,7 @@ import express from "express";
 import NodeCache from "node-cache";
 import { connectDB } from "./utils/Features.js";
 import { errorMiddleware } from "./middlewares/Error.js";
+import Stripe from "stripe";
 
 
 // importing Routes
@@ -19,9 +20,11 @@ config(
 
 const port = process.env.PORT || 3000;
 const mongoURI = process.env.MONGO_URI || "";
+const stripeKey = process.env.STRIPE_KEY || "";
 
 connectDB(mongoURI);
 
+export const stripe = new Stripe(stripeKey);
 export const nodeCache = new NodeCache();
 
 const app = express();

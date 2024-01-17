@@ -4,7 +4,28 @@ import { NewCouponrRequestBody } from "../types/Types.js";
 import ErrorHandler from "../utils/Utility_Class.js";
 import { Coupon } from "../schema/Coupon.js";
 import { Model } from "mongoose";
+import { stripe } from "../app.js";
 
+export const createPayment = TryCatchBlockWrapper(
+    async(req,res,next) => {
+        const {amount} = req.body;
+
+        if(!amount)
+        {
+            return next(new ErrorHandler("Please Enter All Fields", 400));
+        }
+        
+        const payementIntent = await stripe.paymentIntents.create({
+            amount: Number(amount)*100,
+            currency: "inr",
+        });
+ 
+        return res.status(201).json({
+            success: true,
+            clientSecret: payementIntent.client_secret,
+        })
+    }
+)
 
 
 export const newCoupon = TryCatchBlockWrapper(
