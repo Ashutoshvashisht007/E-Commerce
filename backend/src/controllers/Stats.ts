@@ -3,7 +3,7 @@ import { TryCatchBlockWrapper } from "../middlewares/Error.js";
 import { Order } from "../schema/Order.js";
 import { Product } from "../schema/Product.js";
 import { User } from "../schema/User.js";
-import { calculatePercentage } from "../utils/Features.js";
+import { calculatePercentage, getChartData } from "../utils/Features.js";
 
 
 export const dashboardStats = TryCatchBlockWrapper(
@@ -14,9 +14,10 @@ export const dashboardStats = TryCatchBlockWrapper(
     ) => {
 
         let stats;
+        const key = "admin-stats"
 
-        if (nodeCache.has("admin-stats")) {
-            stats = JSON.parse(nodeCache.get("admin-stats") as string);
+        if (nodeCache.has(key)) {
+            stats = JSON.parse(nodeCache.get(key) as string);
         }
         else {
             const today = new Date();
@@ -151,7 +152,7 @@ export const dashboardStats = TryCatchBlockWrapper(
 
             prevSixMonthOrders.forEach((order) => {
                 const orderCreated = order.createdAt;
-                const monthDiff = today.getMonth() - orderCreated.getMonth();
+                const monthDiff = ((today.getMonth() - orderCreated.getMonth()) + 12) % 12;
 
                 if (monthDiff < 6) {
                     orderMonthCounts[6 - monthDiff - 1] += 1;
@@ -199,7 +200,7 @@ export const dashboardStats = TryCatchBlockWrapper(
                 latesttransactions: modifiedTransanction,
             };
 
-            nodeCache.set("admin-stats", JSON.stringify(stats));
+            nodeCache.set(key, JSON.stringify(stats));
         }
 
         return res.status(200).json({
@@ -215,25 +216,97 @@ export const dashboardPie = TryCatchBlockWrapper(
     async (req, res, next) => {
 
         let charts;
-
-        if (nodeCache.has("admit-pie-charts")) {
-            charts = JSON.parse(nodeCache.get("admin-pie-charts") as string);
+        const key = "admin-pie-charts"
+        if (nodeCache.has(key)) {
+            charts = JSON.parse(nodeCache.get(key) as string);
         }
         else {
-            const productStatus = await Order.find({}).select("status");
-            const len = productStatus.length;
 
-            const [processingCount,shippingCount,deliveredCount] = await Promise.all([
-                Order.countDocuments({status: "Processing"}),
-                Order.countDocuments({status: "Shipped"}),
-                Order.countDocuments({status: "Delivered"}),
-            ])
+            const [processingCount, shippingCount, deliveredCount, categories, productsCount, productsOutofStocks, allOrders, userDOB, adminUser, clientUser] = await Promise.all([
+                Order.countDocuments({ status: "Processing" }),
+                Order.countDocuments({ status: "Shipped" }),
+                Order.countDocuments({ status: "Delivered" }),
+                Product.find({}).distinct("category"),
+                Product.countDocuments(),
+                Product.countDocuments({ stock: 0 }),
+                Order.find({}).select(["total", "discount", "subtotal", "tax", "shippingCharges"]),
+                User.find({}).select(["dob"]),
+                User.countDocuments({ role: "admin" }),
+                User.countDocuments({ role: "user" }),
+            ]);
+
+            const countCategoriesArr = categories.map((category) =>
+                Product.countDocuments({ category })
+            );
+
+            const countCategory = await Promise.all(countCategoriesArr);
+
+            const releationOfCategories: Record<string, number>[] = [];
+
+            categories.forEach((category, idx) => {
+                releationOfCategories.push({
+                    [category]: Math.round((countCategory[idx] / productsCount) * 100),
+                });
+            });
+
+            const orderFullfillment = {
+                processing: processingCount,
+                shipped: shippingCount,
+                delivered: deliveredCount,
+            }
+
+            const stockAvailability = {
+                inStock: productsCount - productsOutofStocks,
+                outofStock: productsOutofStocks,
+            }
+
+            const grossIncome = allOrders.reduce(
+                (prev, order) => prev + (order.total || 0), 0
+            );
+            const discount = allOrders.reduce(
+                (prev, order) => prev + (order.discount || 0), 0
+            );
+            const productionCost = allOrders.reduce(
+                (prev, order) => prev + (order.shippingCharges || 0), 0
+            );
+            const burnt = allOrders.reduce(
+                (prev, order) => prev + (order.tax || 0), 0
+            );
+            const marketingCost = Math.round(grossIncome * (20 / 100));
+            const netMargin = grossIncome - discount - productionCost - burnt - marketingCost;
+
+
+            const revenueDistribution = {
+                netMargin,
+                discount,
+                productionCost,
+                burnt,
+                marketingCost,
+            }
+
+            // const teen = 
+
+            const usersAgeGroup = {
+                teen: userDOB.filter(idx => idx.age < 20).length,
+                adult: userDOB.filter(idx => idx.age > 20 && idx.age < 40).length,
+                old: userDOB.filter(idx => idx.age > 40).length
+            }
+
+            const adminCustomer = {
+                admin: adminUser,
+                customers: clientUser,
+            }
 
             charts = {
-                processingRatio: Math.round((processingCount / len) * 100),
-                shippedRatio: Math.round((shippingCount / len) * 100),
-                deliveredRatio: Math.round((deliveredCount / len) * 100),
+                orderFullfillment,
+                releationOfCategories,
+                stockAvailability,
+                revenueDistribution,
+                usersAgeGroup,
+                adminCustomer,
             }
+
+            nodeCache.set(key, JSON.stringify(charts));
         }
 
 
@@ -246,8 +319,60 @@ export const dashboardPie = TryCatchBlockWrapper(
 
 
 export const dashboardBar = TryCatchBlockWrapper(
-    async () => {
+    async (req,res,next) => {
+        let charts;
+        const key = "admin-bar-charts";
 
+        if(nodeCache.has(key))
+        {
+            charts = JSON.parse(nodeCache.get(key) as string);
+        }
+        else
+        {
+
+            const today = new Date();
+            const sixMonthAgo = new Date();
+            sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6); 
+
+            const twelveMonthAgo = new Date();
+            twelveMonthAgo.setMonth(twelveMonthAgo.getMonth() - 12); 
+
+            const lastSixMonthProducts = Product.find({createdAt:{
+                $gte: sixMonthAgo,
+                $lte: today
+            }}).select("createdAt");
+            const lasttwelveMonthOrders = Order.find({createdAt:{
+                $gte: twelveMonthAgo,
+                $lte: today
+            }}).select("createdAt");
+            const lastSixMonthUsers = User.find({createdAt:{
+                $gte: sixMonthAgo,
+                $lte: today
+            }}).select("createdAt");
+
+            const [sixMonthProducts,twelveMonthOrders,sixMonthUsers] = await Promise.all([
+                lastSixMonthProducts,
+                lasttwelveMonthOrders,
+                lastSixMonthUsers,
+            ]);
+
+            const productsCount = getChartData({length: 6, docArr: sixMonthProducts});
+            const ordersCount = getChartData({length: 12, docArr: twelveMonthOrders});
+            const usersCount = getChartData({length: 6, docArr: sixMonthUsers});
+
+            charts = {
+                products: productsCount,
+                orders: ordersCount,
+                users: usersCount,
+            };
+
+            nodeCache.set(key,JSON.stringify(charts));
+        }
+
+        return res.status(200).json({
+            success: true,
+            charts,
+        })
     }
 );
 export const dashboardLine = TryCatchBlockWrapper(
