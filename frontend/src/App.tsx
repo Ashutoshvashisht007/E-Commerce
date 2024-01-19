@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { lazy, Suspense } from "react"
+import {Toaster} from "react-hot-toast";
 import Loader from "./components/Loader"
 import Header from "./components/Header"
 import Shipping from "./pages/Shipping"
@@ -11,7 +12,6 @@ const Search = lazy(() => import("./pages/Search"))
 const Cart = lazy(() => import("./pages/Cart"))
 
 // Admin Imports
-
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
 const Products = lazy(() => import("./pages/admin/products"));
 const Customers = lazy(() => import("./pages/admin/customers"));
@@ -29,8 +29,6 @@ const ProductManagement = lazy(
 const TransactionManagement = lazy(
   () => import("./pages/admin/management/transactionmanagement")
 );
-
-
 
 const App = () => {
   return (
@@ -80,10 +78,9 @@ const App = () => {
 
             <Route path="/admin/transaction/:id" element={<TransactionManagement />} />
           </Route>
-
-
         </Routes>
       </Suspense>
+      <Toaster position="bottom-center"/>
     </Router>
   )
 }

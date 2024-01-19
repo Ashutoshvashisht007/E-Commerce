@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { FaShoppingCart, FaSearch, FaSignInAlt, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { useState } from "react";
 
-const user = { _id: "asdgasd",role: "adsgasd"};
+const user = { _id: "",role: ""};
 
 const Header = () => {
 
