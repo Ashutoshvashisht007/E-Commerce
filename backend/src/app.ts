@@ -5,6 +5,7 @@ import NodeCache from "node-cache";
 import { connectDB } from "./utils/Features.js";
 import { errorMiddleware } from "./middlewares/Error.js";
 import Stripe from "stripe";
+import cors from "cors";
 
 
 // importing Routes
@@ -28,6 +29,7 @@ export const stripe = new Stripe(stripeKey);
 export const nodeCache = new NodeCache();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 

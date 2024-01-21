@@ -1,12 +1,12 @@
 import { createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
-import { server } from "../store";
-
+import { messageResponse } from "../../types/api_types";
+import { User } from "../../types/types";
 
 export const userApi = createApi({
     reducerPath: "userAPI",
-    baseQuery: fetchBaseQuery({baseUrl: `${server}/api/v1/user`}),
+    baseQuery: fetchBaseQuery({baseUrl: `${import.meta.env.VITE_SERVER}/api/v1/user`}),
     endpoints: (builder) => ({
-        login: builder.mutation({
+        login: builder.mutation<messageResponse,User>({
             query: (user)=> ({
                 url: "new",
                 method: "POST",
@@ -14,4 +14,6 @@ export const userApi = createApi({
             })
         }),
     }),
-})
+});
+
+export const {useLoginMutation} = userApi;

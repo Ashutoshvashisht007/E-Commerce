@@ -13,10 +13,12 @@ export const errorMiddleware = (
         err.message ||= "server error"
         err.statusCode ||= 500;
 
-    return res.status(err.statusCode).json({
-        success: false,
-        messsage: err.message,
-    })
+        if (err.name === "CastError") err.message = "Invalid ID";
+
+        return res.status(err.statusCode).json({
+            success: false,
+            messsage: err.message,
+        })
 }
 
 export const TryCatchBlockWrapper = (func: Controller) => (
