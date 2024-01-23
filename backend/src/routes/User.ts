@@ -9,7 +9,7 @@ app.post("/new", newUser);
 // route: /api/v1/user/all
 app.get("/all", getAllUsers)
 // route: /api/v1/user/dynamicid
-app.get("/:id", adminOnly, getUser)
+app.get("/:id", getUser)
 // route: /api/v1/user/dynamicid
 app.delete("/:id", adminOnly, deleteUser)
 

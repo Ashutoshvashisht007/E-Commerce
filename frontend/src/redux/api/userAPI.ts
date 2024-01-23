@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
-import { messageResponse } from "../../types/api_types";
+import { messageResponse, userResponse } from "../../types/api_types";
 import { User } from "../../types/types";
+import axios from "axios";
 
 export const userApi = createApi({
     reducerPath: "userAPI",
@@ -15,5 +16,15 @@ export const userApi = createApi({
         }),
     }),
 });
+
+export const getUser =async (id:string) => {
+    try {
+        const {data}: {data: userResponse} = await axios.get(`${import.meta.env.VITE_SERVER}/api/v1/user/${id}`);
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
 
 export const {useLoginMutation} = userApi;

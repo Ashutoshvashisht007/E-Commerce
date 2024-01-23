@@ -21,22 +21,20 @@ const Login = () => {
             const { user } = await signInWithPopup(auth, provider);
 
             const res = await login({
-                name: "asidgj",
-                email: "Asigih",
-                photo: "asdguh",
+                name: user.displayName!,
+                email: user.email!,
+                photo: user.photoURL!,
                 gender,
                 role: "user",
                 dob: date,
-                _id: "asdgas",
+                _id: user.uid,
             });
 
             if ("data" in res) {
-                console.log(res.data);
                 toast.success(res.data.message);
             } else {
                 const error = res.error as FetchBaseQueryError;
-                const message = (error.data as messageResponse)?.message || "Unknown error";
-                console.log(message);
+                const message = (error.data as messageResponse).message;
                 toast.error(message);
             }
             console.log(user);

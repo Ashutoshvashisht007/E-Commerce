@@ -1,11 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { lazy, Suspense } from "react"
-import {Toaster} from "react-hot-toast";
+import { lazy, Suspense, useEffect } from "react"
+import { Toaster } from "react-hot-toast";
 import Loader from "./components/Loader"
 import Header from "./components/Header"
 import Shipping from "./pages/Shipping"
 import Login from "./pages/Login"
 import Order from "./pages/Order"
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./Firebase";
+import { userExist, userNotExist } from "./redux/reducer/userReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "./redux/api/userAPI";
+import { userReducerInitialState } from "./types/reducer_types";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const Home = lazy(() => import("./pages/Home"))
 const Search = lazy(() => import("./pages/Search"))
@@ -32,9 +39,28 @@ const TransactionManagement = lazy(
 
 const App = () => {
 
-  return (
+  const { user, loading } = useSelector((state: { userReducer: userReducerInitialState }) => state.userReducer);
+
+  const dispatch = useDispatch();
+
+  //authentication
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log("Logged In");
+        const data = await getUser(user.uid);
+        dispatch(userExist(data.user));
+      }
+      else {
+        console.log("not Logged In");
+        dispatch(userNotExist());
+      }
+    })
+  }, []);
+
+  return loading ? <Loader /> : (
     <Router>
-      <Header />
+      <Header user={user} />
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -43,11 +69,17 @@ const App = () => {
 
           {/* Not Logged In Route */}
 
-          <Route path="/signin" element={<Login/>}/>
+          <Route path="/signin" element={
+            <ProtectedRoute isAuthenticated={user ? false : true}>
+              <Login />
+            </ProtectedRoute>
+          } />
 
           {/* Logged In user routes */}
 
-          <Route>
+          <Route element={
+            <ProtectedRoute isAuthenticated={user ? false : true}/>
+          }>
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/orders" element={<Order />} />
           </Route>
@@ -55,9 +87,9 @@ const App = () => {
           {/* Admin Routes */}
 
           <Route
-          // element={
-          //   <ProtectedRoute isAuthenticated={true} adminRoute={true} isAdmin={true} />
-          // }
+            element={
+              <ProtectedRoute isAuthenticated={true} adminRoute={true} isAdmin={true} />
+            }
           >
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/product" element={<Products />} />
@@ -81,7 +113,7 @@ const App = () => {
           </Route>
         </Routes>
       </Suspense>
-      <Toaster position="bottom-center"/>
+      <Toaster position="bottom-center" />
     </Router>
   )
 }
