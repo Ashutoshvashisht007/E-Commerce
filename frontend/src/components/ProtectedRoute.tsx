@@ -11,6 +11,8 @@ interface Props{
 
 const ProtectedRoute = ({isAuthenticated, children, adminRoute, isAdmin, redirect = "/"}: Props) => {
     if(!isAuthenticated) return <Navigate to={redirect}/>;
+
+    if(adminRoute && !isAdmin) return <Navigate to={redirect}/>;
     
     return children ? children : <Outlet/>;
 }

@@ -1,7 +1,8 @@
 import { FaPlus } from "react-icons/fa"
+import { backend } from "../redux/store"
 
 interface ProductsComponent {
-  productID: number,
+  productID: string,
   image: string,
   name: string,
   price: number,
@@ -13,7 +14,7 @@ const ProductCard: React.FC<ProductsComponent> = ({ image, name, price, stock, h
 
   return (
     <div className="homeProduct">
-      <img className="homeProductIMG" src={image} alt={name} />
+      <img className="homeProductIMG" src={`${backend}/${image}`} alt={name} />
       <h3 className="homeProductTitle">{name}</h3>
       <span className="homeProductPrice">${price}</span>
 

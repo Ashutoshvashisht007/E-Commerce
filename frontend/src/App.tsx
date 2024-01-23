@@ -88,7 +88,7 @@ const App = () => {
 
           <Route
             element={
-              <ProtectedRoute isAuthenticated={true} adminRoute={true} isAdmin={true} />
+              <ProtectedRoute isAuthenticated={true} adminRoute={true} isAdmin={user?.role === "admin" ? true : false} />
             }
           >
             <Route path="/admin/dashboard" element={<Dashboard />} />
