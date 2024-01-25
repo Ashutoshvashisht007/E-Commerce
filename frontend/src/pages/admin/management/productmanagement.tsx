@@ -1,6 +1,21 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, ReactElement, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
+import { useAllProductsQuery } from "../../../redux/api/productAPI";
+import { useSelector } from "react-redux";
+import { userReducerInitialState } from "../../../types/reducer_types";
+import toast from "react-hot-toast";
+import { customError } from "../../../types/api_types";
+import { backend } from "../../../redux/store";
+import { Link } from "react-router-dom";
+
+interface DataType {
+  photo: ReactElement;
+  name: string;
+  price: number;
+  stock: number;
+  action: ReactElement;
+}
 
 const img =
   "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8&w=1000&q=804";
@@ -20,6 +35,33 @@ const Productmanagement = () => {
   const [photoFile, setPhotoFile] = useState<File>();
 
   const changeImageHandler = (e: ChangeEvent<HTMLInputElement>) => {
+
+    const {user} = useSelector((state : {useReducer: userReducerInitialState}) => 
+      state.useReducer
+    )
+
+    const { data, isLoading, isError, error } = useAllProductsQuery(user?._id!);
+
+    if(isError)
+    {
+      toast.error((error as customError).data.message);
+    }
+
+    const [info,setInfo] = useState<DataType[]>([]);
+
+
+    useEffect(() => {
+      if (data) {
+        setInfo(data.products.map((product) => ({
+          photo: <img src={`${backend}/${product.photo}`}/>,
+          name: product.name,
+          price: product.price,
+          stock: product.stock,
+          action: <Link to={`/admin/product/${product._id}`}>Manage</Link>
+        })))
+      }
+    }, [data])
+
     const file: File | undefined = e.target.files?.[0];
 
     const reader: FileReader = new FileReader();
@@ -48,7 +90,7 @@ const Productmanagement = () => {
       <AdminSidebar />
       <main className="product-management">
         <section>
-          <strong>ID - fsdfsfsggfgdf</strong>
+          <strong>{`ID - sgda`}</strong>
           <img src={photo} alt="Product" />
           <p>{name}</p>
           {stock > 0 ? (
