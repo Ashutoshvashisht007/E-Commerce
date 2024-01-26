@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { allCategoryResponse, allProductResponse, messageResponse, newProductRequest, searchProductRequest, searchProductResponse } from "../../types/api_types";
+import { allCategoryResponse, allProductResponse, deleteProductRequest, messageResponse, newProductRequest, prodcutDetailResponse, searchProductRequest, searchProductResponse, updateProductRequest } from "../../types/api_types";
 
 export const productAPI = createApi({
     reducerPath: "productAPI",
@@ -8,44 +8,60 @@ export const productAPI = createApi({
     }),
     tagTypes: ["product"],
     endpoints: (builder) => ({
-        latestProducts: builder.query<allProductResponse,string>({
-            query: ()=> "latest",
+        latestProducts: builder.query<allProductResponse, string>({
+            query: () => "latest",
             providesTags: ["product"],
         }),
-        allProducts: builder.query<allProductResponse,string>({
-            query: (id)=> `admin-products?id=${id}`,
+        allProducts: builder.query<allProductResponse, string>({
+            query: (id) => `admin-products?id=${id}`,
             providesTags: ["product"],
         }),
-        allCategories: builder.query<allCategoryResponse,string>({
-            query: ()=> `categories`,
+        allCategories: builder.query<allCategoryResponse, string>({
+            query: () => `categories`,
             providesTags: ["product"],
         }),
-        searchProducts: builder.query<searchProductResponse,searchProductRequest>({
-            query: ({search, sort, page, price, category})=> {
-                
+        searchProducts: builder.query<searchProductResponse, searchProductRequest>({
+            query: ({ search, sort, page, price, category }) => {
+
                 let base = `all?search=${search}&page=${page}`;
 
-                if(price)
-                {
+                if (price) {
                     base += `&price=${price}`;
                 }
-                if(sort)
-                {
+                if (sort) {
                     base += `&sort=${sort}`;
                 }
-                if(category)
-                {
+                if (category) {
                     base += `&category=${category}`;
                 }
 
                 return base;
             },
             providesTags: ["product"],
-        }), 
-        createNewProducts: builder.mutation<messageResponse,newProductRequest>({
-            query: ({id,formData})=> ({
+        }),
+        productDetail: builder.query<prodcutDetailResponse, string>({
+            query: (id) => id,
+            providesTags: ["product"],
+        }),
+        updateProductDetail: builder.mutation<messageResponse, updateProductRequest>({
+            query: ({ product_id, user_id, formData }) => ({
+                url: `${product_id}?id=${user_id}`,
+                method: "PUT",
+                body: formData,
+            }),
+            invalidatesTags: ["product"],
+        }),
+        deleteProduct: builder.mutation<messageResponse, deleteProductRequest>({
+            query: ({ product_id, user_id }) => ({
+                url: `${product_id}?id=${user_id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["product"],
+        }),
+        createNewProducts: builder.mutation<messageResponse, newProductRequest>({
+            query: ({ id, formData }) => ({
                 url: `new?id=${id}`,
-                method: "post",
+                method: "POST",
                 body: formData,
             }),
             invalidatesTags: ["product"]
@@ -53,4 +69,4 @@ export const productAPI = createApi({
     })
 });
 
-export const {useLatestProductsQuery, useAllProductsQuery, useAllCategoriesQuery, useSearchProductsQuery, useCreateNewProductsMutation} = productAPI;
+export const { useLatestProductsQuery, useAllProductsQuery, useAllCategoriesQuery, useSearchProductsQuery, useProductDetailQuery, useUpdateProductDetailMutation, useDeleteProductMutation, useCreateNewProductsMutation } = productAPI;
