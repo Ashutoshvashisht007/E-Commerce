@@ -226,7 +226,7 @@ export const deleteProduct = TryCatchBlockWrapper(
             console.log("Product Photo Deleted");
         });
 
-        await Product.deleteOne({_id: product._id});
+        await product.deleteOne();
 
         invalidatesCache({product: true, productId: String(product._id),admin: true}, );
 

@@ -1,117 +1,101 @@
-import iphone14 from "../assets/images/iphone14.png"
 import { useEffect, useState } from "react";
 import CartItem from "../components/CartItem";
 import { Link } from "react-router-dom";
-
-interface productCard{
-  id: number,
-  image: string,
-  title: string,
-  price: number
-}
-
-const products: productCard[] = [
-
-  {
-    id: 1,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 2,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 3,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 4,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 5,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 6,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 7,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-  {
-    id: 8,
-    image: "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70",
-    title: "iPhone 14",
-    price: 100
-  },
-
-]
+import { useDispatch, useSelector } from "react-redux";
+import { cartReducerInitialState } from "../types/reducer_types";
+import { cartItems } from "../types/types";
+import toast from "react-hot-toast";
+import { addToCart, applyDiscount, calculatePrice, removeFromCart } from "../redux/reducer/cartReducer";
+import axios from "axios";
+import { backend } from "../redux/store";
 
 const Cart = () => {
+
+  const dispatch = useDispatch();
+
+  const { cartItems, subtotal, tax, total, shippingCharges, shippingInfo, discount } = useSelector((state: { cartReducer: cartReducerInitialState }) => state.cartReducer)
 
   const [couponCode, setCouponCode] = useState<string>("");
   const [isValidCouponCode, setIsValidCouponCode] = useState<boolean>(false);
 
-  useEffect(()=>{
+  const addToCartHandler = (cartItem: cartItems) => {
+    if (cartItem.stock <= cartItem.quantity) {
+      return toast.error("Out of stock");
+    }
+    dispatch(addToCart({ ...cartItem, quantity: cartItem.quantity + 1 }));
+  }
+  const subToCartHandler = (cartItem: cartItems) => {
+    if (cartItem.quantity < 2) {
+      return toast.error("Atlease One item required");
+    }
+    dispatch(addToCart({ ...cartItem, quantity: cartItem.quantity - 1 }));
+  }
+  const removeHandler = (id: string) => {
+    dispatch(removeFromCart(id));
+    toast.success("Item Deleted Successfully");
+  }
 
-    const timeOutId = setTimeout(()=>{
-      Math.random() > 0.5 ? setIsValidCouponCode(true) : setIsValidCouponCode(false);
-    },1000)
+  useEffect(() => {
 
-    return() => {
+    const { token, cancel } = axios.CancelToken.source();
+
+    const timeOutId = setTimeout(() => {
+
+      axios.get(`${backend}/api/v1/payment/discount?coupon=${couponCode}`, { cancelToken: token }).then((res) => {
+        dispatch(applyDiscount(res.data.discount));
+        dispatch(calculatePrice());
+        setIsValidCouponCode(true);
+      })
+        .catch(() => {
+          dispatch(applyDiscount(0));
+          dispatch(calculatePrice());
+          setIsValidCouponCode(false);
+        })
+    }, 1000)
+
+    return () => {
       clearTimeout(timeOutId);
+      cancel();
       setIsValidCouponCode(false);
     }
-  },[couponCode])
+  }, [couponCode]);
+
+  useEffect(() => {
+    dispatch(calculatePrice());
+  }, [cartItems]);
 
   return (
     <div className="cart">
       <main className="cartLeftContainer">
         {
 
-          products.length > 0 ? (products.map((product: productCard)=>
-            <CartItem key={product.id} productId={product.id} image={product.image} title={product.title} price={product.price}/>
+          cartItems.length > 0 ? (cartItems.map((product) =>
+            <CartItem key={product.productId} cartItem={product} incrementhandler={addToCartHandler} decrementhandler={subToCartHandler} removehandler={removeHandler} />
           )) : <h1>No Items Added</h1>
         }
       </main>
 
       <aside className="cartRightContainer">
-        <span>Subtotal: $100</span>
-        <span>Shipping Charget: $0</span>
-        <span>Tax Charget: $10</span>
-        <span>Discountt: <em> - $0 </em></span>
-        <span><b>Total: $110</b></span>
+        <span>Subtotal: ${subtotal}</span>
+        <span>Shipping Charges: ${shippingCharges}</span>
+        <span>Tax Charges: ${tax}</span>
+        <span>Discount: <em> - ${discount} </em></span>
+        <span><b>Total: ${total}</b></span>
 
         <input type="text" placeholder="Coupon Code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
 
         {
-          couponCode && 
-            (isValidCouponCode ? 
-              (
-                <span className="green greenText">$10 off using <code>{couponCode}</code></span>
-              ) : (
-                <span className="red redText">Invalid Coupon Code</span>
-              ))
+          couponCode &&
+          (isValidCouponCode ?
+            (
+              <span className="green greenText">$10 off using <code>{couponCode}</code></span>
+            ) : (
+              <span className="red redText">Invalid Coupon Code</span>
+            ))
         }
 
         {
-          products.length > 0 && <Link to="/shipping">
+          cartItems.length > 0 && <Link to="/shipping">
             <button className="cartCouponBtn">Check Out</button>
           </Link>
         }

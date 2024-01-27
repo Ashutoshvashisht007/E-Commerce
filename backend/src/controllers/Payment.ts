@@ -110,7 +110,7 @@ export const deleteCoupon = TryCatchBlockWrapper(
             return next(new ErrorHandler("Invalid Coupon", 400));
         }
 
-        await Coupon.deleteOne({_id: Coupons._id});
+        await Coupons.deleteOne();
 
         return res.status(200).json({
             success: true,

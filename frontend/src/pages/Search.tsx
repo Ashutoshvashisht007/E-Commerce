@@ -4,8 +4,13 @@ import { useAllCategoriesQuery, useSearchProductsQuery } from "../redux/api/prod
 import toast from "react-hot-toast";
 import { customError } from "../types/api_types";
 import { Skeleton } from "../components/Loader";
+import { cartItems } from "../types/types";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../redux/reducer/cartReducer";
 
 const Search = () => {
+
+  const dispatch = useDispatch();
 
   const { data: categoriesResponse, isLoading, isError, error } = useAllCategoriesQuery("");
 
@@ -36,8 +41,13 @@ const Search = () => {
     toast.error(err.data.message);
   }
 
-  const addToCardHandler = () => {
-
+  const addToCardHandler = (cartItem: cartItems) => {
+    if(cartItem.stock < 1)
+    {
+      return toast.error("Out of stock");
+    }
+    dispatch(addToCart(cartItem));
+    toast.success("Added to cart");
   }
 
   return (
@@ -81,7 +91,7 @@ const Search = () => {
           {
             productLoading ? <Skeleton /> :
             searchedData?.products.map((product) =>
-              <ProductCard key={product._id} productID={product._id} image={product.photo} name={product.name} price={product.price} stock={product.stock} handler={addToCardHandler} />
+              <ProductCard key={product._id} productId={product._id} photo={product.photo} name={product.name} price={product.price} stock={product.stock} handler={addToCardHandler} />
             )
 
           }

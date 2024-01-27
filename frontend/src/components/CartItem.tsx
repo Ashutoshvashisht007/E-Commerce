@@ -1,49 +1,42 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { FaMinus, FaPlus } from 'react-icons/fa'
 import { MdDelete } from 'react-icons/md'
 import { Link } from 'react-router-dom';
+import { backend } from '../redux/store';
+import { cartItems } from '../types/types';
 
-interface CartItemContainer{
-    productId: number,
-    image: string,
-    title: string,
-    price: number,
+interface CartItemContainer {
+  cartItem: cartItems;
+  incrementhandler: (cartItem: cartItems) => string | undefined;
+  decrementhandler: (cartItem: cartItems) => string | undefined;
+  removehandler: (id: string) => void;
 }
 
-const CartItem: React.FC<CartItemContainer> = ({productId,image,title,price}) => {
-
-  const [count,setCount] = useState<number>(0);
-
-  const handleMinus = ()=>{
-    if(count > 0)
-    {
-      setCount((prev)=>prev - 1);
-    }
-  }
+const CartItem: React.FC<CartItemContainer> = ({ cartItem, incrementhandler, decrementhandler, removehandler}) => {
 
   return (
     <div className='cartProductsLeft'>
-    <div className="cartProductDetails">
-          <img src={image} alt={title}/>
-          <div className="cartProductDesc">
-            <Link to={`/product/${productId}`}>
-              <span className="cartProductTitle">{title}</span>
-            </Link>
-            <h3 className="cartProductPrice">${price}</h3>
-          </div>
-    </div>
-    <div className="cartButtons">
-      <button className="cartButton" onClick={()=> handleMinus()}>
-        <FaMinus />
-      </button>
-      <span>{count}</span>
-      <button className="cartButton" onClick={()=> setCount((prev)=>prev + 1)}>
-        <FaPlus />
-      </button>
-      <button className="cartButtonDel">
-        <MdDelete className="cartButtonDelete" />
-      </button>
-    </div>
+      <div className="cartProductDetails">
+        <img src={`${backend}/${cartItem.photo}`} alt={cartItem.name} />
+        <div className="cartProductDesc">
+          <Link to={`/product/${cartItem.productId}`}>
+            <span className="cartProductTitle">{cartItem.name}</span>
+          </Link>
+          <h3 className="cartProductPrice">${cartItem.price}</h3>
+        </div>
+      </div>
+      <div className="cartButtons">
+        <button className="cartButton" onClick={() => decrementhandler(cartItem)}>
+          <FaMinus />
+        </button>
+        <span>{cartItem.quantity}</span>
+        <button className="cartButton" onClick={() => incrementhandler(cartItem)}>
+          <FaPlus />
+        </button>
+        <button className="cartButtonDel" onClick={()=> removehandler(cartItem.productId)}>
+          <MdDelete className="cartButtonDelete" />
+        </button>
+      </div>
     </div>
   )
 }
