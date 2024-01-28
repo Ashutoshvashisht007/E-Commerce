@@ -1,59 +1,66 @@
 import { FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { OrderItem } from "../../../models/types";
-import { server } from "../../../redux/store";
+import { backend } from "../../../redux/store";
+import { order, orderItem } from "../../../types/types";
+import { useSingleOrderQuery } from "../../../redux/api/orderAPI";
+import { useSelector } from "react-redux";
+import { userReducerInitialState } from "../../../types/reducer_types";
 
-const img =
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8&w=1000&q=804";
-
-const orderItems: OrderItem[] = [
-  {
-    name: "Puma Shoes",
-    photo: img,
-    id: "asdsaasdas",
-    quantity: 4,
-    price: 2000,
+const defaultData: order = {
+  shippingInfo: {
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    pincode: "",
   },
-];
+  status: "",
+  subtotal: 0,
+  discount: 0,
+  shippingCharges: 0,
+  tax: 0,
+  total: 0,
+  orderItems: [],
+  user: { name: "", _id: "" },
+  _id: "",
+};
 
 const TransactionManagement = () => {
-  const [order, setOrder] = useState({
-    name: "Puma Shoes",
-    address: "77 black street",
-    city: "Neyword",
-    state: "Nevada",
-    country: "US",
-    pinCode: 242433,
-    status: "Processing",
-    subtotal: 4000,
-    discount: 1200,
-    shippingCharges: 0,
-    tax: 200,
-    total: 4000 + 200 + 0 - 1200,
-    orderItems,
-  });
+
+  // const {user} = useSelector((state: {userReducer: userReducerInitialState})=> state.userReducer);
+  const param = useParams();
+  const navigate = useNavigate();
+
+  const { data, isError, isLoading } = useSingleOrderQuery(param.id!);
+
+  if (isError) {
+    return <Navigate to={"/404"} />
+  }
 
   const {
-    name,
-    address,
-    city,
-    country,
-    state,
-    pinCode,
-    subtotal,
-    shippingCharges,
-    tax,
-    discount,
-    total,
+    shippingInfo: { address, city, state, country, pincode },
+    orderItems,
+    user: { name },
     status,
-  } = order;
+    tax,
+    subtotal,
+    total,
+    discount,
+    shippingCharges,
+  } = data?.order || defaultData;
 
   const updateHandler = (): void => {
-    setOrder((prev) => ({
-      ...prev,
-      status: "Shipped",
-    }));
+    // setOrder((prev) => ({
+    //   ...prev,
+    //   status: "Shipped",
+    // }));
+  };
+  const deleteHandler = (): void => {
+    // setOrder((prev) => ({
+    //   ...prev,
+    //   status: "Shipped",
+    // }));
   };
 
   return (
@@ -66,18 +73,17 @@ const TransactionManagement = () => {
           }}
         >
           <h2>Order Items</h2>
-
           {orderItems.map((i) => (
-            <ProductCard
-              key={i._id}
-              name={i.name}
-              photo={`${server}/${i.photo}`}
-              productId={i.productId}
-              _id={i._id}
-              quantity={i.quantity}
-              price={i.price}
-            />
-          ))}
+                <ProductCard
+                  key={i._id}
+                  name={i.name}
+                  photo={`${backend}/${i.photo}`}
+                  productId={i.productId}
+                  _id={i._id}
+                  quantity={i.quantity}
+                  price={i.price}
+                />
+              ))}
         </section>
 
         <article className="shipping-info-card">
@@ -88,7 +94,7 @@ const TransactionManagement = () => {
           <h5>User Info</h5>
           <p>Name: {name}</p>
           <p>
-            Address: {`${address}, ${city}, ${state}, ${country} ${pinCode}`}
+            Address: {`${address}, ${city}, ${state}, ${country} ${pincode}`}
           </p>
           <h5>Amount Info</h5>
           <p>Subtotal: {subtotal}</p>
@@ -105,8 +111,8 @@ const TransactionManagement = () => {
                 status === "Delivered"
                   ? "purple"
                   : status === "Shipped"
-                  ? "green"
-                  : "red"
+                    ? "green"
+                    : "red"
               }
             >
               {status}
@@ -127,7 +133,7 @@ const ProductCard = ({
   price,
   quantity,
   productId,
-}: OrderItem) => (
+}: orderItem) => (
   <div className="transaction-product-card">
     <img src={photo} alt={name} />
     <Link to={`/product/${productId}`}>{name}</Link>

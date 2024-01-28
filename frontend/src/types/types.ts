@@ -34,3 +34,28 @@ export type cartItems = {
     quantity: number;
     stock: number;
 }
+
+export type orderItem = {
+    name: string;
+    photo: string;
+    price: number;
+    quantity: number;
+    productId: string;
+    _id: string;
+}
+
+export type order = {
+    shippingInfo: shippingInfo;
+    user: {
+        name: string;
+        _id: string;
+    };
+    subtotal: number;
+    tax: number;
+    shippingCharges: number;
+    discount: number;
+    total: number;
+    orderItems: orderItem[];
+    _id: string;
+    status: string;
+}

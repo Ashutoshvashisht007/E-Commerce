@@ -84,7 +84,7 @@
         top: 8%;
         z-index: 999;
         > div{
-            @include flex(row,space-evenly,center,2)
+            @include flex(column,space-evenly,center,3)
         }
         
     }

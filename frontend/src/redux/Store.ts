@@ -3,6 +3,7 @@ import { userApi } from "./api/userAPI";
 import { userReducer } from "./reducer/userReducer";
 import { productAPI } from "./api/productAPI";
 import { cartReducer } from "./reducer/cartReducer";
+import { orderAPI } from "./api/orderAPI";
 
 export const backend = import.meta.env.VITE_SERVER;
 
@@ -12,6 +13,7 @@ export const store = configureStore({
         [productAPI.reducerPath]: productAPI.reducer,
         [userReducer.name]: userReducer.reducer,
         [cartReducer.name]: cartReducer.reducer,
+        [orderAPI.reducerPath]: orderAPI.reducer
     },
-    middleware: (gDM) => gDM().concat(userApi.middleware, productAPI.middleware),
+    middleware: (gDM) => gDM().concat(userApi.middleware, productAPI.middleware, orderAPI.middleware),
 });

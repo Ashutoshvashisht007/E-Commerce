@@ -88,7 +88,7 @@ const Cart = () => {
           couponCode &&
           (isValidCouponCode ?
             (
-              <span className="green greenText">$10 off using <code>{couponCode}</code></span>
+              <span className="green greenText">${discount} off using <code>{couponCode}</code></span>
             ) : (
               <span className="red redText">Invalid Coupon Code</span>
             ))

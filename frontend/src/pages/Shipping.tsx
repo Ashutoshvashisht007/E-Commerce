@@ -1,11 +1,15 @@
-import { ChangeEvent, useMemo, useState } from "react"
+import { ChangeEvent, useEffect, useMemo, useState } from "react"
 import { BiArrowBack } from "react-icons/bi"
+import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import countryList from 'react-select-country-list'
+import { cartReducerInitialState } from "../types/reducer_types"
 
 const Shipping = () => {
 
     const navigate = useNavigate();
+
+    const {cartItems} = useSelector((state: {cartReducer: cartReducerInitialState})=> state.cartReducer);
 
     const [shippingInfo,setShippingInfo] = useState({
         address: "",
@@ -20,6 +24,11 @@ const Shipping = () => {
     };
 
     const options = useMemo(()=> countryList().getData(),[]);
+
+    useEffect(() => {
+        if(cartItems.length <= 0) return navigate("/cart");
+    }, [cartItems])
+    
 
   return (
     <div className="shipping">
