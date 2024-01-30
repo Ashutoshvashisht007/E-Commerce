@@ -3,9 +3,8 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { backend } from "../../../redux/store";
 import { order, orderItem } from "../../../types/types";
-import { useSingleOrderQuery } from "../../../redux/api/orderAPI";
-import { useSelector } from "react-redux";
-import { userReducerInitialState } from "../../../types/reducer_types";
+import { useDeleteOrderMutation, useProcessOrderMutation, useSingleOrderQuery } from "../../../redux/api/orderAPI";
+import { responseToast } from "../../../types/utils/Featurs";
 
 const defaultData: order = {
   shippingInfo: {
@@ -32,7 +31,7 @@ const TransactionManagement = () => {
   const param = useParams();
   const navigate = useNavigate();
 
-  const { data, isError, isLoading } = useSingleOrderQuery(param.id!);
+  const { data, isError } = useSingleOrderQuery(param.id!);
 
   if (isError) {
     return <Navigate to={"/404"} />
@@ -41,7 +40,7 @@ const TransactionManagement = () => {
   const {
     shippingInfo: { address, city, state, country, pincode },
     orderItems,
-    user: { name },
+    user,
     status,
     tax,
     subtotal,
@@ -50,17 +49,25 @@ const TransactionManagement = () => {
     shippingCharges,
   } = data?.order || defaultData;
 
-  const updateHandler = (): void => {
-    // setOrder((prev) => ({
-    //   ...prev,
-    //   status: "Shipped",
-    // }));
+  const [updateOrder] = useProcessOrderMutation();
+  const [deleteOrder] = useDeleteOrderMutation();
+
+  const updateHandler = async () => {
+    const res = await updateOrder({
+      order_id: param?.id!,
+      user_id: user?._id!,
+    });
+
+    responseToast(res,navigate,"/admin/transaction");
   };
-  const deleteHandler = (): void => {
-    // setOrder((prev) => ({
-    //   ...prev,
-    //   status: "Shipped",
-    // }));
+
+  const deleteHandler = async () => {
+    const res = await deleteOrder({
+      order_id: param?.id!,
+      user_id: user?._id!,
+    });
+
+    responseToast(res,navigate,"/admin/transaction");
   };
 
   return (
@@ -92,7 +99,7 @@ const TransactionManagement = () => {
           </button>
           <h1>Order Info</h1>
           <h5>User Info</h5>
-          <p>Name: {name}</p>
+          <p>Name: {user.name}</p>
           <p>
             Address: {`${address}, ${city}, ${state}, ${country} ${pincode}`}
           </p>
@@ -138,7 +145,7 @@ const ProductCard = ({
     <img src={photo} alt={name} />
     <Link to={`/product/${productId}`}>{name}</Link>
     <span>
-      ₹{price} X {quantity} = ₹{price * quantity}
+      ${price} X {quantity} = ${price * quantity}
     </span>
   </div>
 );

@@ -17,6 +17,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const Home = lazy(() => import("./pages/Home"))
 const Search = lazy(() => import("./pages/Search"))
 const Cart = lazy(() => import("./pages/Cart"))
+const Not_Found = lazy(() => import("./pages/Not-Founde"));
+const Checkout = lazy(() => import("./pages/Checkout"));
 
 // Admin Imports
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
@@ -82,6 +84,7 @@ const App = () => {
           }>
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/orders" element={<Order />} />
+            <Route path="/pay" element={<Checkout />} />
           </Route>
 
           {/* Admin Routes */}
@@ -111,6 +114,7 @@ const App = () => {
 
             <Route path="/admin/transaction/:id" element={<TransactionManagement />} />
           </Route>
+          <Route path="*" element={<Not_Found/>}/>
         </Routes>
       </Suspense>
       <Toaster position="bottom-center" />

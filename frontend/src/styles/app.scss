@@ -100,28 +100,29 @@
     // justify-content:
   }
 
+  .checkout-container{
+    max-width: 400px;
+    width: 100%;
+    margin: auto;
+    > form{
+      @include flex(column,flex-start,stretch,2rem);
 
+      > button{
+        padding: 0.5rem;
+        width: 100%;
+        font-size: 1.1rem;
+        background-color: $color1;
+        cursor: pointer;
 
+        &:hover{
+          border: none;
+          background-color: $color2;
+          color: $color1;
+        }
+      }
+    }
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
   .admin-container {
     @include grid(1fr 4fr, 2rem);
     height: 100vh;
