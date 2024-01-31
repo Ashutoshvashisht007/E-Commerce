@@ -1,8 +1,15 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { Column } from "react-table";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import TableHOC from "../../components/admin/TableHOC";
+import { useAllUsersQuery, useDeleteUserMutation } from "../../redux/api/userAPI";
+import { useSelector } from "react-redux";
+import { userReducerInitialState } from "../../types/reducer_types";
+import { customError } from "../../types/api_types";
+import toast from "react-hot-toast";
+import { responseToast } from "../../types/utils/Featurs";
+import { useNavigate } from "react-router-dom";
 
 interface DataType {
   avatar: ReactElement;
@@ -40,55 +47,52 @@ const columns: Column<DataType>[] = [
   },
 ];
 
-const img = "https://randomuser.me/api/portraits/women/54.jpg";
-const img2 = "https://randomuser.me/api/portraits/women/50.jpg";
-
-const arr: Array<DataType> = [
-  {
-    avatar: (
-      <img
-        style={{
-          borderRadius: "50%",
-        }}
-        src={img}
-        alt="Shoes"
-      />
-    ),
-    name: "Emily Palmer",
-    email: "emily.palmer@example.com",
-    gender: "female",
-    role: "user",
-    action: (
-      <button>
-        <FaTrash />
-      </button>
-    ),
-  },
-
-  {
-    avatar: (
-      <img
-        style={{
-          borderRadius: "50%",
-        }}
-        src={img2}
-        alt="Shoes"
-      />
-    ),
-    name: "May Scoot",
-    email: "aunt.may@example.com",
-    gender: "female",
-    role: "user",
-    action: (
-      <button>
-        <FaTrash />
-      </button>
-    ),
-  },
-];
-
 const Customers = () => {
-  const [rows, setRows] = useState<DataType[]>(arr);
+
+  const {user} = useSelector((state: {userReducer: userReducerInitialState}) => state.userReducer);
+
+  const [deleteUser] = useDeleteUserMutation();
+  const navigate = useNavigate();
+
+  const {data, isError, error, isLoading} = useAllUsersQuery(user?._id!);
+  
+  if(isError)
+  {
+    const err = error as customError;
+    toast.error(err.data.message);
+  }
+
+  const [rows, setRows] = useState<DataType[]>([]);
+
+  // const handleDelete = ()=>{
+
+  // }
+
+  useEffect(()=>{
+    if(data)
+    {
+      setRows(data.users.map((idx) => ({
+        avatar: (
+          <img style={{ borderRadius: "50%",}} src={idx.photo} alt="Shoes" />
+          ),
+          email: idx.email,
+          name: idx.name,
+          gender: idx.gender,
+          role: idx.role,
+          action: (
+            <button onClick={async ()=> {
+              const res = await deleteUser({
+                user_Id: idx._id,
+                admin_Id: user?._id!,
+              });
+              responseToast(res,navigate,`/admin/customer`);
+            }}>
+              <FaTrash />
+            </button>
+          )
+      })));
+    }
+  },[data])
 
   const Table = TableHOC<DataType>(
     columns,

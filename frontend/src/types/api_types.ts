@@ -87,3 +87,8 @@ export type processOrderRequest = {
     order_id: string;
     user_id: string;
 }
+
+export type allUsersResponse = {
+    success: boolean,
+    users: User[],
+}

@@ -59,3 +59,8 @@ export type order = {
     _id: string;
     status: string;
 }
+
+export type deleteUser = {
+    user_Id: string,
+    admin_Id: string,
+}
