@@ -1,25 +1,24 @@
 import { Request } from "express";
 import { TryCatchBlockWrapper } from "../middlewares/Error.js";
-import { NewCouponrRequestBody } from "../types/Types.js";
+import { NewCouponrRequestBody, NewOrderRequestBody, newStripeRequestBody } from "../types/Types.js";
 import ErrorHandler from "../utils/Utility_Class.js";
 import { Coupon } from "../schema/Coupon.js";
-import { Model } from "mongoose";
 import { stripe } from "../app.js";
 
 export const createPayment = TryCatchBlockWrapper(
-    async(req,res,next) => {
-        const {amount} = req.body;
+    async (req:Request< {}, {}, newStripeRequestBody>, res, next) => {
+        const { amount } = req.body;
 
-        if(!amount)
-        {
+        if (!amount) {
             return next(new ErrorHandler("Please Enter All Fields", 400));
         }
-        
+
         const payementIntent = await stripe.paymentIntents.create({
-            amount: Number(amount)*100,
-            currency: "inr",
+            amount: Number(amount) * 100,
+            currency: 'inr',
+            description: "for ecommersce project",
         });
- 
+
         return res.status(201).json({
             success: true,
             clientSecret: payementIntent.client_secret,
@@ -33,12 +32,11 @@ export const newCoupon = TryCatchBlockWrapper(
         req: Request<{}, {}, NewCouponrRequestBody>,
         res,
         next
-    )=> {
+    ) => {
 
-        const {coupon, amount} = req.body;
+        const { coupon, amount } = req.body;
 
-        if(!coupon || !amount)
-        {
+        if (!coupon || !amount) {
             return next(new ErrorHandler("Please Enter All Fields", 400));
         }
 
@@ -51,20 +49,19 @@ export const newCoupon = TryCatchBlockWrapper(
             success: true,
             message: "Coupon created successfully"
         })
-});
+    });
 
 export const applyDiscount = TryCatchBlockWrapper(
     async (
         req,
         res,
         next
-    )=> {
+    ) => {
 
-        const {coupon} = req.query;
-        const discount = await Coupon.findOne({coupon});
+        const { coupon } = req.query;
+        const discount = await Coupon.findOne({ coupon });
 
-        if(!discount)
-        {
+        if (!discount) {
             return next(new ErrorHandler("Invalid Coupon", 400));
         }
 
@@ -74,18 +71,17 @@ export const applyDiscount = TryCatchBlockWrapper(
             success: true,
             discount: discount.amount,
         })
-});
+    });
 
 export const allCoupons = TryCatchBlockWrapper(
     async (
         req,
         res,
         next
-    )=> {
+    ) => {
         const coupons = await Coupon.find({});
 
-        if(!coupons)
-        {
+        if (!coupons) {
             return next(new ErrorHandler("No Coupons Present", 400));
         }
 
@@ -93,20 +89,19 @@ export const allCoupons = TryCatchBlockWrapper(
             success: true,
             coupons,
         })
-});
+    });
 
 export const deleteCoupon = TryCatchBlockWrapper(
     async (
         req,
         res,
         next
-    )=> {
-        const {id} = req.params;
+    ) => {
+        const { id } = req.params;
         const Coupons = await Coupon.findById(id);
         console.log(Coupons);
 
-        if(!Coupons)
-        {
+        if (!Coupons) {
             return next(new ErrorHandler("Invalid Coupon", 400));
         }
 
@@ -116,4 +111,4 @@ export const deleteCoupon = TryCatchBlockWrapper(
             success: true,
             message: "Coupon Deleted successfully"
         })
-});
+    });

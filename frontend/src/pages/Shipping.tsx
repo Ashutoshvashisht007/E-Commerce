@@ -1,27 +1,57 @@
-import { ChangeEvent, useEffect, useMemo, useState } from "react"
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react"
 import { BiArrowBack } from "react-icons/bi"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import countryList from 'react-select-country-list'
 import { cartReducerInitialState } from "../types/reducer_types"
+import axios from "axios"
+import { backend } from "../redux/store"
+import toast from "react-hot-toast"
+import { saveShippingInfo } from "../redux/reducer/cartReducer"
 
 const Shipping = () => {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const {cartItems} = useSelector((state: {cartReducer: cartReducerInitialState})=> state.cartReducer);
+    const {cartItems, total} = useSelector((state: {cartReducer: cartReducerInitialState})=> state.cartReducer);
 
     const [shippingInfo,setShippingInfo] = useState({
         address: "",
         city: "",
         state: "",
         country: "",
-        pinCode: "",
+        pincode: "",
     });
 
     const changeHandler = (e:ChangeEvent<HTMLInputElement | HTMLSelectElement>)=>{
         setShippingInfo((prev) => ({...prev, [e.target.name] : e.target.value}))
     };
+
+    const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        dispatch(saveShippingInfo(shippingInfo));
+
+        try {
+            const {data} = await axios.post(`${backend}/api/v1/payment/create`,{
+                amount: total,
+                // shippingInfo,
+            },
+            {
+                headers:{
+                    "Content-Type":"application/json"
+                },
+            });
+
+            navigate("/pay",{
+                state: data.clientSecret,
+            })
+        } catch (error) {
+            console.log(error);
+            toast.error("Something Went Wrong");
+        }
+    }
 
     const options = useMemo(()=> countryList().getData(),[]);
 
@@ -35,7 +65,7 @@ const Shipping = () => {
         <button className="shippingBtn" onClick={()=> navigate("/cart")}>
             <BiArrowBack/>
         </button>
-        <form className="shippingForm">
+        <form className="shippingForm" onSubmit={submitHandler}>
             <h1 className="shippingTitle">SHIPPING ADDRESS</h1>
             <input 
                 required
@@ -74,8 +104,8 @@ const Shipping = () => {
                 required
                 type="number" 
                 placeholder="Pin Code" 
-                name="pinCode"
-                value={shippingInfo.pinCode}
+                name="pincode"
+                value={shippingInfo.pincode}
                 onChange={changeHandler}
             />
             <button type="submit" className="shippingSubmitBtn">PAY NOW</button>

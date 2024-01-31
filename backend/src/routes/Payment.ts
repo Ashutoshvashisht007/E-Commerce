@@ -4,7 +4,7 @@ import { adminOnly } from "../middlewares/Auth.js";
 
 const app = express.Router();
 
-app.post("/create",adminOnly,createPayment);
+app.post("/create",createPayment);
 app.post("/coupon/new", adminOnly, newCoupon);
 app.get("/coupon/all", adminOnly, allCoupons);
 app.delete("/coupon/:id", adminOnly, deleteCoupon);

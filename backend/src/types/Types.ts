@@ -80,3 +80,8 @@ export interface NewCouponrRequestBody {
     coupon: string;
     amount: number;
 }
+
+export interface newStripeRequestBody{
+    amount: Number,
+    // shippingInfo: ShippingInfoType,
+}
