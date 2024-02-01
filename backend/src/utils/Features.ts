@@ -17,7 +17,7 @@ export const invalidatesCache = ({ product, order, admin, userId, orderId, produ
         if (typeof productId === "string") {
             productKeys.push(`product-${productId}`);
         }
-        else if (typeof productId === "object") {
+        if (typeof productId === "object") {
             productId.forEach(e =>
                 productKeys.push(`product-${e}`)
             )

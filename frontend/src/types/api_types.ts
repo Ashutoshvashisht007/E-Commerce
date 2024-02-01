@@ -1,4 +1,4 @@
-import { Product, User, cartItems, order, shippingInfo } from "./types";
+import { Product, Stats, User, cartItems, order, shippingInfo } from "./types";
 
 export type customError = {
     status: number;
@@ -91,4 +91,9 @@ export type processOrderRequest = {
 export type allUsersResponse = {
     success: boolean,
     users: User[],
+}
+
+export type dashboardStatsResponse = {
+    success: boolean,
+    stats: Stats
 }

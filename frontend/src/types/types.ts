@@ -64,3 +64,34 @@ export type deleteUser = {
     user_Id: string,
     admin_Id: string,
 }
+
+type revenues = {
+    revenue: number,
+    product: number,
+    user: number,
+    order: number,
+}
+
+type LatestTransaction = {
+    _id: string;
+    amount: number;
+    discount: number;
+    quantity: number;
+    status: string;
+  };
+
+export type Stats = {
+    releationOfCategories: Record<string,number>[],
+    precent: revenues,
+    count: revenues,
+    chart: {
+        order: number[],
+        revenue: number[],
+    },
+    genderRatio: {
+        male: number,
+        female: number,
+        others: number,
+    },
+    latesttransactions: LatestTransaction[],
+}

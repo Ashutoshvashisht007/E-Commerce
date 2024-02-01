@@ -183,7 +183,7 @@ export const dashboardStats = TryCatchBlockWrapper(
             const modifiedTransanction = transactions.map(idx => ({
                 _id: idx._id,
                 discount: idx.discount,
-                total: idx.total,
+                amount: idx.total,
                 status: idx.status,
                 quantity: idx.orderItems.length
             }))

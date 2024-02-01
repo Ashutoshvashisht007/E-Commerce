@@ -64,16 +64,12 @@ const Customers = () => {
 
   const [rows, setRows] = useState<DataType[]>([]);
 
-  // const handleDelete = ()=>{
-
-  // }
-
   useEffect(()=>{
     if(data)
     {
       setRows(data.users.map((idx) => ({
         avatar: (
-          <img style={{ borderRadius: "50%",}} src={idx.photo} alt="Shoes" />
+          <img style={{ borderRadius: "50%",}} src={idx.photo} alt={idx.name} />
           ),
           email: idx.email,
           name: idx.name,
