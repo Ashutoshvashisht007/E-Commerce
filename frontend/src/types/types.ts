@@ -95,3 +95,47 @@ export type Stats = {
     },
     latesttransactions: LatestTransaction[],
 }
+
+type Distribution = {
+    netMargin: number;
+    discount: number;
+    productionCost: number;
+    burnt: number;
+    marketingCost: number;
+}
+
+export type Charts = {
+    releationOfCategories: Record<string,number>[],
+    orderFullfillment: {
+        processing: number,
+        shipped: number,
+        delivered: number,
+    },
+    revenueDistribution: Distribution,
+    stockAvailability: {
+        inStock: number,
+        outofStock: number,
+    }
+    usersAgeGroup: {
+        teen: number,
+        adult: number,
+        old: number,
+    },
+    adminCustomer:{
+        admin: number,
+        customers: number,
+    }
+}
+
+export type BarChart = {
+    products: number[],
+    orders: number[],
+    users: number[]
+}
+
+export type LineChart = {
+    products: number[],
+    users: number[],
+    discount: number[]
+    revenue: number[]
+}

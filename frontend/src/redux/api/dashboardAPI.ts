@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { dashboardStatsResponse } from "../../types/api_types";
+import { dashboardBarResponse, dashboardLineResponse, dashboardPieResponse, dashboardStatsResponse } from "../../types/api_types";
 
 
 export const dashboardAPI = createApi({
@@ -10,15 +10,19 @@ export const dashboardAPI = createApi({
     endpoints: (builder) => ({
         dashboardStats: builder.query<dashboardStatsResponse,string>({
             query: (id)=> `stats?id=${id}`,
+            keepUnusedDataFor: 0,
         }),
-        dashboardPie: builder.query<dashboardStatsResponse,string>({
+        dashboardPie: builder.query<dashboardPieResponse,string>({
             query: (id)=> `pie?id=${id}`,
+            keepUnusedDataFor: 0
         }),
-        dashboardBar: builder.query<dashboardStatsResponse,string>({
+        dashboardBar: builder.query<dashboardBarResponse,string>({
             query: (id)=> `bar?id=${id}`,
+            keepUnusedDataFor: 0
         }),
-        dashboardLine: builder.query<dashboardStatsResponse,string>({
+        dashboardLine: builder.query<dashboardLineResponse,string>({
             query: (id)=> `line?id=${id}`,
+            keepUnusedDataFor: 0
         }),
     })
 

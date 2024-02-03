@@ -11,6 +11,9 @@ import { userReducerInitialState } from "../../types/reducer_types";
 import { customError } from "../../types/api_types";
 import toast from "react-hot-toast";
 import { Skeleton } from "../../components/Loader";
+import { getLastMonths } from "../../types/utils/Featurs";
+
+const {last6Months} = getLastMonths();
 
 const Dashboard = () => {
 
@@ -75,6 +78,7 @@ const Dashboard = () => {
                 <BarChart
                   data_2={stats.chart.revenue}
                   data_1={stats.chart.order}
+                  labels={last6Months}
                   title_1="Revenue"
                   title_2="Transaction"
                   bgColor_1="rgb(0, 115, 255)"

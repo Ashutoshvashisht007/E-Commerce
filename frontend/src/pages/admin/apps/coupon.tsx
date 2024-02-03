@@ -1,50 +1,36 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-
-const allLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-const allNumbers = "1234567890";
-const allSymbols = "!@#$%^&*()_+";
+import { useSelector } from "react-redux";
+import { userReducerInitialState } from "../../../types/reducer_types";
+import { useNewCouponMutation } from "../../../redux/api/couponAPI";
+import { responseToast } from "../../../types/utils/Featurs";
+import { useNavigate } from "react-router-dom";
 
 const Coupon = () => {
-  const [size, setSize] = useState<number>(8);
-  const [prefix, setPrefix] = useState<string>("");
-  const [includeNumbers, setIncludeNumbers] = useState<boolean>(false);
-  const [includeCharacters, setIncludeCharacters] = useState<boolean>(false);
-  const [includeSymbols, setIncludeSymbols] = useState<boolean>(false);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
 
+  const navigate = useNavigate();
+
+  const {user} = useSelector((state: {userReducer: userReducerInitialState}) => state.userReducer);
+
+  const [newCouponn] = useNewCouponMutation();
+
+  const [size, setSize] = useState<number>(0);
   const [coupon, setCoupon] = useState<string>("");
 
-  const copyText = async (coupon: string) => {
-    await window.navigator.clipboard.writeText(coupon);
-    setIsCopied(true);
-  };
-
-  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!includeNumbers && !includeCharacters && !includeSymbols)
-      return alert("Please Select One At Least");
-
-    let result: string = prefix || "";
-    const loopLength: number = size - result.length;
-
-    for (let i = 0; i < loopLength; i++) {
-      let entireString: string = "";
-      if (includeCharacters) entireString += allLetters;
-      if (includeNumbers) entireString += allNumbers;
-      if (includeSymbols) entireString += allSymbols;
-
-      const randomNum: number = ~~(Math.random() * entireString.length);
-      result += entireString[randomNum];
+    const data = {
+      coupon,
+      amount: size,
     }
+    const res = await newCouponn({
+      id: user?._id!,
+      data,
+    });
+    responseToast(res,navigate,"/admin/app/coupon")
 
-    setCoupon(result);
   };
-
-  useEffect(() => {
-    setIsCopied(false);
-  }, [coupon]);
 
   return (
     <div className="admin-container">
@@ -56,9 +42,9 @@ const Coupon = () => {
             <input
               type="text"
               placeholder="Text to include"
-              value={prefix}
-              onChange={(e) => setPrefix(e.target.value)}
-              maxLength={size}
+              value={coupon}
+              onChange={(e) => setCoupon(e.target.value)}
+              maxLength={15}
             />
 
             <input
@@ -67,44 +53,10 @@ const Coupon = () => {
               value={size}
               onChange={(e) => setSize(Number(e.target.value))}
               min={8}
-              max={25}
+              max={1000}
             />
-
-            <fieldset>
-              <legend>Include</legend>
-
-              <input
-                type="checkbox"
-                checked={includeNumbers}
-                onChange={() => setIncludeNumbers((prev) => !prev)}
-              />
-              <span>Numbers</span>
-
-              <input
-                type="checkbox"
-                checked={includeCharacters}
-                onChange={() => setIncludeCharacters((prev) => !prev)}
-              />
-              <span>Characters</span>
-
-              <input
-                type="checkbox"
-                checked={includeSymbols}
-                onChange={() => setIncludeSymbols((prev) => !prev)}
-              />
-              <span>Symbols</span>
-            </fieldset>
             <button type="submit">Generate</button>
           </form>
-
-          {coupon && (
-            <code>
-              {coupon}{" "}
-              <span onClick={() => copyText(coupon)}>
-                {isCopied ? "Copied" : "Copy"}
-              </span>{" "}
-            </code>
-          )}
         </section>
       </main>
     </div>

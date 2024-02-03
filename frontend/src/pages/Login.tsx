@@ -47,6 +47,7 @@ const Login = () => {
         <div className='login'>
             <main className="loginForm">
                 <h1>LOGIN</h1>
+                <h4>If already registered no need to fill the fields else fill the fields and register first</h4>
                 <div>
                     <label>Gender</label>
                     <select value={gender} onChange={(e) => setGender(e.target.value)}>
@@ -62,7 +63,6 @@ const Login = () => {
                 </div>
 
                 <div className="loginBtn">
-                    <p>Already Signed In Once</p>
                     <button onClick={loginHandler}>
                         <FcGoogle />
                         <span>Sign in with Google</span>

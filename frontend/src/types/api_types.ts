@@ -1,4 +1,4 @@
-import { Product, Stats, User, cartItems, order, shippingInfo } from "./types";
+import { BarChart, Charts, LineChart, Product, Stats, User, cartItems, order, shippingInfo } from "./types";
 
 export type customError = {
     status: number;
@@ -96,4 +96,27 @@ export type allUsersResponse = {
 export type dashboardStatsResponse = {
     success: boolean,
     stats: Stats
+}
+
+export type dashboardPieResponse = {
+    success: boolean,
+    charts: Charts
+}
+
+export type dashboardBarResponse = {
+    success: boolean,
+    charts: BarChart,
+}
+
+export type dashboardLineResponse = {
+    success: boolean,
+    charts: LineChart,
+}
+
+export type newCouponRequest = {
+    id: string,
+    data: {
+        coupon: string,
+        amount: number,
+    }
 }
